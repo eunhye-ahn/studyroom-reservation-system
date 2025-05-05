@@ -41,12 +41,16 @@ public class ReservationService {
         Seat seat = seatRepository.findById(request.getSeatId())
                 .orElseThrow(()-> new IllegalArgumentException("스터디룸을 찾을 수 없습니다."));
 
-        Reservation reservation = new Reservation();
-        reservation.setUser(user);
-        reservation.setSeat(seat);
-        reservation.setDate(request.getDate());
-        reservation.setStartTime(request.getStartTime());
-        reservation.setEndTime(request.getEndTime());
+        boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
+                seat, request.getDate(), request.getStartTime(), request.getEndTime()
+        );
+
+        if(exists){
+            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+        }
+
+        Reservation reservation = new Reservation(user,
+                request.getDate(), request.getStartTime(), request.getEndTime(),seat);
 
         reservationRepository.save(reservation);
     }

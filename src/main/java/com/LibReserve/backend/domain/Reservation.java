@@ -24,6 +24,17 @@ public class Reservation {
     @JoinColumn(name = "seat_id")
     private Seat seat;
 
+    public Reservation() {
+    }
+
+    public Reservation(User user, LocalDate date, LocalTime startTime, LocalTime endTime, Seat seat) {
+        this.user = user;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.seat = seat;
+    }
+
     public Long getId() {
         return id;
     }
