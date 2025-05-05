@@ -52,11 +52,23 @@ public class ReservationController {
 
     }
 
+    //내 예약내역 조회
     @GetMapping("/my")
     public ResponseEntity<List<ReservationResponse>> getMeReservations(HttpServletRequest request){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         List<ReservationResponse> response = reservationService.getMyReservations(email);
         return ResponseEntity.ok(response);
+    }
+
+    //예약 취소
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<String> cancelReservation(@PathVariable Long reservationId,
+                                                    HttpServletRequest httpRequest){
+        String token = getTokenFromRequest(httpRequest);
+        String email = jwtUtil.getEmailFromToken(token);
+
+        reservationService.cancelReservation(reservationId, email);
+        return ResponseEntity.ok("예약이 취소되었습니다.");
     }
 
 }

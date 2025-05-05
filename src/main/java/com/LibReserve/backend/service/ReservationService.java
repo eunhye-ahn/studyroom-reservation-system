@@ -61,4 +61,14 @@ public class ReservationService {
                 .map(ReservationResponse::new)
                 .collect(Collectors.toList());
     }
+
+    public void cancelReservation(Long reservationId, String email){
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(()-> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+        if(!reservation.getUser().getEmail().equals(email)){
+            throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
+        }
+
+        reservationRepository.delete(reservation);
+    }
 }
