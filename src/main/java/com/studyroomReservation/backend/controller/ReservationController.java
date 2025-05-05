@@ -3,10 +3,11 @@ package com.studyroomReservation.backend.controller;
 import com.studyroomReservation.backend.config.JwtUtil;
 import com.studyroomReservation.backend.domain.Reservation;
 import com.studyroomReservation.backend.dto.ReservationRequest;
+import com.studyroomReservation.backend.dto.ReservationResponse;
 import com.studyroomReservation.backend.service.ReservationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,4 +51,12 @@ public class ReservationController {
         return null;
 
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<ReservationResponse>> getMeReservations(HttpServletRequest request){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<ReservationResponse> response = reservationService.getMyReservations(email);
+        return ResponseEntity.ok(response);
+    }
+
 }

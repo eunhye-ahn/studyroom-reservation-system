@@ -1,42 +1,37 @@
-HELP.md
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+### Java & Gradle ###
+/build/
+/.gradle/
+/out/
+/bin/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-application.properties
-*.properties
-.env
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# Gradle Wrapper
+!/gradle/wrapper/gradle-wrapper.jar
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+### IDEs ###
+# IntelliJ
+.idea/
 *.iml
 *.ipr
-*.class
-*.log
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+*.iws
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# Eclipse / STS
+*.classpath
+*.project
+*.settings/
+.apt_generated/
+.factorypath/
+.sts4-cache/
+.springBeans/
 
-### VS Code ###
+# VSCode
 .vscode/
+
+### Logs & Env ###
+*.log
+*.env
+*.properties
+application.properties
+
+### OS/기타 ###
+.DS_Store
+Thumbs.db

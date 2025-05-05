@@ -9,6 +9,7 @@ public class ReservationRequest {
     private LocalTime startTime;
     private LocalTime endTime;
 
+
     public Long getStudyRoomId() {
         return studyRoomId;
     }

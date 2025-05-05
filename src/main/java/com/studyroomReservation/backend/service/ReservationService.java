@@ -4,12 +4,14 @@ import com.studyroomReservation.backend.domain.Reservation;
 import com.studyroomReservation.backend.domain.StudyRoom;
 import com.studyroomReservation.backend.domain.User;
 import com.studyroomReservation.backend.dto.ReservationRequest;
+import com.studyroomReservation.backend.dto.ReservationResponse;
 import com.studyroomReservation.backend.repository.ReservationRepository;
 import com.studyroomReservation.backend.repository.StudyRoomRepository;
 import com.studyroomReservation.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -43,5 +45,12 @@ public class ReservationService {
         reservation.setEndTime(request.getEndTime());
 
         reservationRepository.save(reservation);
+    }
+
+    public List<ReservationResponse> getMyReservations(String email){
+        return reservationRepository.findByUserEmail(email)
+                .stream()
+                .map(ReservationResponse::new)
+                .collect(Collectors.toList());
     }
 }
