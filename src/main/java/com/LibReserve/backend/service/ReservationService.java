@@ -3,6 +3,7 @@ package com.LibReserve.backend.service;
 import com.LibReserve.backend.domain.Reservation;
 import com.LibReserve.backend.domain.Seat;
 import com.LibReserve.backend.domain.User;
+import com.LibReserve.backend.dto.AdminReservationRequest;
 import com.LibReserve.backend.dto.ReservationRequest;
 import com.LibReserve.backend.dto.ReservationResponse;
 import com.LibReserve.backend.repository.ReservationRepository;
@@ -69,6 +70,41 @@ public class ReservationService {
             throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
         }
 
+        reservationRepository.delete(reservation);
+    }
+
+    public List<ReservationResponse> getAllReservations(){
+        List<Reservation> reservations = reservationRepository.findAll();
+        return reservations.stream()
+                .map(ReservationResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    public ReservationResponse createReservationByAdmin(AdminReservationRequest request){
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow( ()->new IllegalArgumentException("사용자 없음"));
+        Seat seat = seatRepository.findById(request.getSeatId())
+                .orElseThrow(()->new IllegalArgumentException("좌석 없음"));
+
+        boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
+                seat, request.getDate(), request.getStartTime(), request.getEndTime()
+        );
+
+        if(exists){
+            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+        }
+
+        Reservation reservation = new Reservation(user,
+                request.getDate(), request.getStartTime(), request.getEndTime(),seat);
+
+        reservationRepository.save(reservation);
+
+        return new ReservationResponse(reservation);
+    }
+
+    public void deleteReservationByAdmin(Long id){
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("예약 없음"));
         reservationRepository.delete(reservation);
     }
 }

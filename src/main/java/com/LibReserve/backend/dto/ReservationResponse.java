@@ -7,6 +7,7 @@ import java.time.LocalTime;
 
 public class ReservationResponse {
     private Long Id;
+    private String userEmail;
     private String readingRoomName;
     private int seatNumber;
     private LocalDate date;
@@ -15,6 +16,7 @@ public class ReservationResponse {
 
     public ReservationResponse(Reservation reservation) {
         this.Id = reservation.getId();
+        this.userEmail = reservation.getUser().getEmail();
         this.readingRoomName = reservation.getSeat().getReadingRoom().getName();
         this.seatNumber = reservation.getSeat().getNumber();
         this.date = reservation.getDate();
@@ -28,6 +30,14 @@ public class ReservationResponse {
 
     public void setId(Long id) {
         Id = id;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public String getReadingRoomName() {

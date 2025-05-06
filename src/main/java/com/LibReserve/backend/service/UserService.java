@@ -25,6 +25,8 @@ public class UserService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
+
+
     public LoginResponse loginAndCreateToken(LoginRequest request){
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -33,7 +35,7 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
+        String accessToken = jwtUtil.generateAccessToken(user.getEmail(),user.getRole());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
         refreshTokenRepository.save(

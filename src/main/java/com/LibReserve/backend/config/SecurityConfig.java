@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/rooms/**").permitAll()
                         .requestMatchers("/reservation").authenticated()
                         .requestMatchers("/reading-rooms/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()         //나머지는 인증 필요
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
