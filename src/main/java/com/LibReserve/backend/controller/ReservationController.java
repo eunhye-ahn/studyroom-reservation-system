@@ -7,7 +7,6 @@ import com.LibReserve.backend.dto.ReservationResponse;
 import com.LibReserve.backend.service.ReservationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -64,19 +63,12 @@ public class ReservationController {
     //예약 취소
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<String> cancelReservation(@PathVariable Long reservationId,
-                                                    HttpServletRequest httpRequest){
+                                                    HttpServletRequest httpRequest) {
         String token = getTokenFromRequest(httpRequest);
         String email = jwtUtil.getEmailFromToken(token);
 
         reservationService.cancelReservation(reservationId, email);
         return ResponseEntity.ok("예약이 취소되었습니다.");
-    }
-
-    @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ReservationResponse>> getAllReservations(){
-        List<ReservationResponse> response = reservationService.getAllReservations();
-        return ResponseEntity.ok(response);
     }
 
 }

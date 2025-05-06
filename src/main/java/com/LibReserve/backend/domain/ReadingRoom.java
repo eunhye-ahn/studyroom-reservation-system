@@ -14,7 +14,7 @@ public class ReadingRoom {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy ="readingRoom")
+    @OneToMany(mappedBy ="readingRoom", cascade = CascadeType.ALL)
     //@JsonIgnore
     private List<Seat> seats;
 

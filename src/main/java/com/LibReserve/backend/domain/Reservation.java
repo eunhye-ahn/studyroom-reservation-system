@@ -17,11 +17,11 @@ public class Reservation {
     private LocalTime endTime;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "seat_id")
+    @JoinColumn(name = "seat_id" , nullable = false)
     private Seat seat;
 
     public Reservation() {

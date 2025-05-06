@@ -39,12 +39,13 @@ public class JwtUtil {
 
     private final long REFRESH_EXPIRATION_MS = 1000 * 60 * 60 * 24 * 7;
 
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(String email, Role role) {
         Date now = new Date();
         Date ExpiryDate = new Date(now.getTime() + REFRESH_EXPIRATION_MS);
 
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role",role)
                 .setIssuedAt(now)
                 .setExpiration(ExpiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
