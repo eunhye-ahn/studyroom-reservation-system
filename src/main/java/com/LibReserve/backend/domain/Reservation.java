@@ -24,16 +24,30 @@ public class Reservation {
     @JoinColumn(name = "seat_id" , nullable = false)
     private Seat seat;
 
+    @Column(nullable = false)
+    private int extensionCount = 0;
+
+    public int getExtensionCount() {
+        return extensionCount;
+    }
+
+    public void setExtensionCount(int extensionCount) {
+        this.extensionCount = extensionCount;
+    }
+
     public Reservation() {
     }
 
-    public Reservation(User user, LocalDate date, LocalTime startTime, LocalTime endTime, Seat seat) {
+    public Reservation(User user, LocalDate date, LocalTime startTime, LocalTime endTime, Seat seat, int extensionCount) {
         this.user = user;
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
         this.seat = seat;
+        this.extensionCount = extensionCount;
     }
+
+
 
     public Long getId() {
         return id;

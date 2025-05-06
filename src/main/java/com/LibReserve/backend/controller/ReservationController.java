@@ -49,7 +49,6 @@ public class ReservationController {
             return bearer.substring(7);
         }
         return null;
-
     }
 
     //내 예약내역 조회

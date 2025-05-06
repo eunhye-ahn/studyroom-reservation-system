@@ -56,7 +56,7 @@ public class ReservationService {
         }
 
         Reservation reservation = new Reservation(user,
-                date, startTime, endTime,seat);
+                date, startTime, endTime,seat,0);
 
         reservationRepository.save(reservation);
     }
@@ -100,7 +100,7 @@ public class ReservationService {
         }
 
         Reservation reservation = new Reservation(user,
-                request.getDate(), request.getStartTime(), request.getEndTime(),seat);
+                request.getDate(), request.getStartTime(), request.getEndTime(),seat, 0);
 
         reservationRepository.save(reservation);
 
@@ -143,4 +143,43 @@ public class ReservationService {
         );
     }
 
+    public ReservationResponse extendReservation(Long reservationId, String email) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("본인만 예약을 연장할 수 있습니다."));
+
+        if (reservation.getExtensionCount() > 3) {
+            throw new IllegalArgumentException("하루 최대 연장 횟수(3회)를 초과했습니다.");
+        }
+
+        LocalTime now = LocalTime.now();
+        if (now.isBefore(reservation.getEndTime().minusHours(1))) {
+            throw new IllegalArgumentException("예약 종료 1시간부터 연장이 가능합니다.");
+        }
+
+        LocalDate date = reservation.getDate();
+        LocalTime newStart = now;
+        LocalTime newEnd = now.plusHours(3);
+
+        boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
+                reservation.getSeat(), date, newStart, newEnd
+        );
+
+        if (exists) {
+            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+        }
+
+        Reservation newReservation = new Reservation(
+                reservation.getUser(),
+                date,
+                newStart,
+                newEnd,
+                reservation.getSeat(),
+                reservation.getExtensionCount()+1
+                );
+        reservationRepository.save(newReservation);
+
+        return new ReservationResponse(newReservation);
+    }
 }
