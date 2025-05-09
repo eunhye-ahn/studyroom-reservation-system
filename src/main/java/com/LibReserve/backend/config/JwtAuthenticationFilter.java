@@ -10,27 +10,36 @@ package com.LibReserve.backend.config;
 //Spring Security의 SecurityContext에 등록
 //→ 이후 컨트롤러에서 인증된 사용자로 인식됨
 
-import com.LibReserve.backend.domain.Role;
+import com.LibReserve.backend.domain.User;
+import com.LibReserve.backend.dto.UserPrincipal;
+import com.LibReserve.backend.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.Authentication;
+
 
 import java.io.IOException;
 import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtUtil jwtUtil;
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    private final UserRepository userRepository;
+
+
+    public JwtAuthenticationFilter( JwtUtil jwtUtil, UserRepository userRepository) {
+
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     protected void doFilterInternal(HttpServletRequest request,
@@ -40,19 +49,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = getTokenFromRequest(request);
 
+
         if(token != null && jwtUtil.validateToken(token)) {
+            String name = jwtUtil.getNameFromToken(token);
             String email = jwtUtil.getEmailFromToken(token);
             String role = jwtUtil.getRoleFromToken(token);
 
-            //권한설정
-            List<GrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_"+ role));
+            User user = userRepository.findByEmail(email).orElseThrow(() ->
+                    new RuntimeException("사용자 정보를 찾을 수 없습니다."));
 
+            UserPrincipal userPrincipal = new UserPrincipal(user);
+
+
+            //그다음에 인증 객체 생성
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            //SecurityContext에 인증객체 등록
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+
+
+
         }
+
+
+
+
+
         filterChain.doFilter(request, response); //다음 요청 계속 전달하기
     }
 

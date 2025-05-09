@@ -35,11 +35,11 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken = jwtUtil.generateAccessToken(user.getEmail(),user.getRole());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail(),user.getRole());
+        String accessToken = jwtUtil.generateAccessToken(user.getName(), user.getEmail(),user.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getName(), user.getName(),user.getRole());
 
         refreshTokenRepository.save(
-                new RefreshToken(user.getEmail(), refreshToken)
+                new RefreshToken(user.getName(), refreshToken)
         );
 
         return new LoginResponse(accessToken, refreshToken);
@@ -52,6 +52,7 @@ public class UserService {
             throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
         }
         User user = new User();
+        user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
