@@ -3,6 +3,7 @@ package com.LibReserve.backend.controller;
 import com.LibReserve.backend.domain.ReadingRoom;
 import com.LibReserve.backend.dto.RoomSeatStatusResponse;
 import com.LibReserve.backend.dto.SeatResponse;
+import com.LibReserve.backend.dto.SeatStatusDto;
 import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.service.ReservationService;
@@ -34,8 +35,9 @@ public class SeatController {
         return ResponseEntity.ok(seats);
     }
     @GetMapping("/{roomId}/status")
-    public ResponseEntity<RoomSeatStatusResponse> getRoomSeatStatus(@PathVariable Long roomId){
+    public List<SeatStatusDto> getRoomSeatStatus(@PathVariable Long roomId){
         RoomSeatStatusResponse status = reservationService.getRoomSeatStaus(roomId);
-        return ResponseEntity.ok(status);
+        return status.getSeatStatus();
     }
+
 }

@@ -3,6 +3,7 @@ import axiosInstance from "../api/axiosInstance";
 import { useEffect, useState } from "react";
 
 interface Room {
+    id : number;
     name : String;
     totalSeats : number;
     availableSeats : number;
@@ -29,7 +30,7 @@ const RoomList= ()=>{
             <ul>
                 {rooms.map((room)=>(
                     <li>
-                        <span>{room.name} </span>
+                        <span onClick={()=>navigate(`/rooms/${room.id}`)}>{room.name} </span>
                         <span>잔여좌석 : {room.availableSeats}/{room.totalSeats}</span>
                     </li>
                 ))}

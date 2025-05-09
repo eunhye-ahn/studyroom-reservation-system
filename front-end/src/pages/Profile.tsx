@@ -5,7 +5,7 @@ import axiosInstance from "../api/axiosInstance";
 interface UserInfo {
     name: string;
     email: string;
-    role: 'USER' | 'ADMIN';
+    role: string;
   }
 
 function Profile(){

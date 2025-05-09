@@ -5,6 +5,8 @@ import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import RoomList from './pages/RoomList';
+import RoomDetail from './pages/RoomDetail';
+import MyReservation from './pages/MyReservation';
 
 function App() {
 
@@ -17,9 +19,8 @@ function App() {
         <Route path="/home" element={<Home/>}/>
         <Route path="/profile" element={<Profile/>}/>
         <Route path="/roomList" element={<RoomList/>}/>
-        {/* <Route path="/my-reservation" element={<MyReservation/>}/>
-
-        <Route path="/rooms/:roomId" element={<RoomDetail/>}/> */}
+        <Route path="myReservation" element={<MyReservation/>}/>
+        <Route path="/rooms/:roomId" element={<RoomDetail/>}/>
 
       </Routes>
     </BrowserRouter>

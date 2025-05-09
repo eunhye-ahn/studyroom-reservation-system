@@ -15,9 +15,9 @@ const Login = () => {
                 email,
                 password
             }, { headers: { 'Content-Type': 'application/json' } });
-            const token = res.data.accessToken;
-            localStorage.setItem("token",token);
-            console.log("로그인토큰",token);
+            const accessToken = res.data.accessToken;
+            localStorage.setItem("accessToken",accessToken);
+            console.log("로그인토큰",accessToken);
         
 
             alert("로그인 성공!")

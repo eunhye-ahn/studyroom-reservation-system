@@ -3,12 +3,13 @@ package com.LibReserve.backend.dto;
 import com.LibReserve.backend.domain.ReadingRoom;
 
 public class ReadingRoomResponse {
+    private Long id;
     private String name;
     private int totalSeats;
     private int availableSeats;
 
     public ReadingRoomResponse(ReadingRoom room) {
-
+        this.id = room.getId();
         this.name = room.getName();
         this.totalSeats = room.getSeats().size();
         this.availableSeats = (int)room.getSeats().stream()
@@ -16,7 +17,13 @@ public class ReadingRoomResponse {
                 .count();
     }
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
