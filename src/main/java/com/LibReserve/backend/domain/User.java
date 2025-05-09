@@ -11,7 +11,7 @@ public class User{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+
     private String name;
 
     @Column(nullable = false, unique = true)
@@ -22,11 +22,12 @@ public class User{
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role = Role.USER;
+    private Role role = Role.STUDENT;
 
-    public String getUsername() {
-        return email; // 이메일을 사용자 이름처럼 사용
+    public User() {
+        this.role = Role.STUDENT;
     }
+
 
     public Long getId() {
         return id;

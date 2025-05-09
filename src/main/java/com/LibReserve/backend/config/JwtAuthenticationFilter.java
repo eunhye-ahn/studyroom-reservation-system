@@ -42,6 +42,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userRepository = userRepository;
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        System.out.println("Jwt 필터 진입: " + request.getServletPath());
+        String path = request.getServletPath();
+        return path.equals("/api/auth/signUp") || path.equals("/api/auth/login")
+                || path.startsWith("/rooms");
+    }
+
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
@@ -49,13 +57,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = getTokenFromRequest(request);
 
+        System.out.println("토큰: " + token);
 
         if(token != null && jwtUtil.validateToken(token)) {
             String name = jwtUtil.getNameFromToken(token);
             String email = jwtUtil.getEmailFromToken(token);
             String role = jwtUtil.getRoleFromToken(token);
 
+            System.out.println("토큰에서 추출한 email: " + email);
+
             User user = userRepository.findByEmail(email).orElseThrow(() ->
+
                     new RuntimeException("사용자 정보를 찾을 수 없습니다."));
 
             UserPrincipal userPrincipal = new UserPrincipal(user);

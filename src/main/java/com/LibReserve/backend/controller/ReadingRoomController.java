@@ -1,6 +1,7 @@
 package com.LibReserve.backend.controller;
 
 import com.LibReserve.backend.domain.ReadingRoom;
+import com.LibReserve.backend.dto.ReadingRoomResponse;
 import com.LibReserve.backend.service.ReadingRoomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +20,9 @@ public class ReadingRoomController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReadingRoom>> getAllRooms(){
+    public List<ReadingRoomResponse> getAllRooms(){
+
         List<ReadingRoom> rooms = readingRoomService.getAllRooms();
-        return ResponseEntity.ok(rooms);
+        return rooms.stream().map(ReadingRoomResponse::new).toList();
     }
 }

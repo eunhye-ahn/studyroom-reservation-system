@@ -28,15 +28,18 @@ public class UserService {
 
 
     public LoginResponse loginAndCreateToken(LoginRequest request){
-
+        System.out.println("🔐 로그인 요청 email: " + request.getEmail());
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(()->new IllegalArgumentException("존재하지 않는 아이디입니다."));
         if(!passwordEncoder.matches(request.getPassword(),user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
+        System.out.println("✅ 비밀번호 일치");
         String accessToken = jwtUtil.generateAccessToken(user.getName(), user.getEmail(),user.getRole());
         String refreshToken = jwtUtil.generateRefreshToken(user.getName(), user.getName(),user.getRole());
+
+        System.out.println("accessToken: " + accessToken);
 
         refreshTokenRepository.save(
                 new RefreshToken(user.getName(), refreshToken)
@@ -55,6 +58,7 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        System.out.println("초기 role 값: " + user.getRole());  // ✅ 확인 로그
         userRepository.save(user);
     }
 

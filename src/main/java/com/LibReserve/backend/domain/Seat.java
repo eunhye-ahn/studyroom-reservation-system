@@ -10,9 +10,19 @@ public class Seat {
 
     private int number;
 
+    private boolean available = true;
+
     @ManyToOne
     @JoinColumn(name = "reading_room_id")
     private ReadingRoom readingRoom;
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     public Long getId() {
         return id;
