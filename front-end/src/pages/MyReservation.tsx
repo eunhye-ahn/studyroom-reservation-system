@@ -14,13 +14,27 @@ interface MyReserve {
 function MyReservation() {
     const [myReserveInfo, setMyReserveInfo] = useState<MyReserve[]>([]);
 
+    async function fetchMyReserveData() {
+        const res = await axiosInstance.get("/reservation/my");
+        setMyReserveInfo(res.data);
+    }
     useEffect(() => {
-        async function fetchMyReserveData() {
-            const res = await axiosInstance.get("/reservation/my");
-            setMyReserveInfo(res.data);
-        }
+
         fetchMyReserveData();
     }, []);
+
+    async function handleCancel(id: number) {
+        try {
+            await axiosInstance.delete(`/reservation/${id}`);
+            alert("예약이 취소되었습니다.");
+            fetchMyReserveData();
+
+
+        } catch (error) {
+            console.error("예약 취소 실패", error);
+            alert("예약 취소 실패");
+        }
+    }
 
     return (
         <div>
@@ -29,13 +43,14 @@ function MyReservation() {
                 <p>현재 예약이 없습니다.</p>) : (
                 <ul>
                     {myReserveInfo.map((res) => (
-                        <li>
+                        <li key={res.id}>
                             <div>열람실 : {res.readingRoomName}</div>
                             <div>좌석 번호 : {res.seatNumber}</div>
                             <div>날짜 : {res.date}</div>
                             <div>
                                 시간 : {res.startTime} ~ {res.endTime}
                             </div>
+                            <button onClick={() =>  handleCancel(res.id) }>취소하기</button>
                         </li>
                     ))}
                 </ul>

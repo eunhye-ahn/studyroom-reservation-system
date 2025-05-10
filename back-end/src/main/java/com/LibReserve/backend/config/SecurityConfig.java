@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/signUp","/api/auth/login").permitAll() // ✅ 로그인/회원가입 허용.requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/rooms").permitAll()
-                        .requestMatchers("/reservation").authenticated()
+                        .requestMatchers("/reservation/**").authenticated()
                         .requestMatchers("/reading-rooms/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 

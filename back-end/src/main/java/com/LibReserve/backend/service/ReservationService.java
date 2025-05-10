@@ -58,6 +58,7 @@ public class ReservationService {
         Reservation reservation = new Reservation(user,
                 date, startTime, endTime,seat,0);
 
+        seat.setAvailable(false);
         reservationRepository.save(reservation);
     }
 
@@ -101,7 +102,7 @@ public class ReservationService {
 
         Reservation reservation = new Reservation(user,
                 request.getDate(), request.getStartTime(), request.getEndTime(),seat, 0);
-
+        seat.setAvailable(false);
         reservationRepository.save(reservation);
 
         return new ReservationResponse(reservation);
@@ -129,7 +130,7 @@ public class ReservationService {
                 .map(seat -> new SeatStatusDto(
                         seat.getId(),
                         seat.getNumber(),
-                        !reservedSeatIds.contains(seat.getId())
+                        seat.isAvailable()
                 ))
                 .collect(Collectors.toList());
 
