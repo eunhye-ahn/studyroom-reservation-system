@@ -5,22 +5,15 @@ import axiosInstance from "../api/axiosInstance";
 interface UserInfo {
     name: string;
     email: string;
-    role: string;
+    role: 'USER' | 'ADMIN';
   }
 
 function Profile(){
     const [userInfo,setUserInfo] = useState<UserInfo>();
     const navigate = useNavigate();
 
-    useEffect(()=>{
-        const token = localStorage.getItem("token");
-        console.log("보내는 토큰", token);
-        if(!token){
-            alert("로그인이 필요합니다.");
-            navigate("/login");
-            return;
-        }
-        axiosInstance.get("/api/auth/me")
+    async function fetchMyData(){
+                await axiosInstance.get("/api/auth/me")
         .then((res) => {
             console.log("응답 데이터:", res.data);
           setUserInfo(res.data);
@@ -30,6 +23,17 @@ function Profile(){
           alert("로그인을 다시 해주세요.");
           navigate("/login");
         });
+    }
+
+    useEffect(()=>{
+        const token = localStorage.getItem("accessToken");
+        console.log("보내는 토큰", token);
+        if(!token){
+            alert("로그인이 필요합니다.");
+            navigate("/login");
+            return;
+        }
+        fetchMyData();
     }, [navigate]);
     if(!userInfo){
         return <div>loading...</div>

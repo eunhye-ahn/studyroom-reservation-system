@@ -9,7 +9,9 @@ import com.LibReserve.backend.repository.ReservationRepository;
 import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -75,7 +77,9 @@ public class ReservationService {
         if(!reservation.getUser().getEmail().equals(email)){
             throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
         }
-
+        Seat seat = reservation.getSeat();
+        seat.setAvailable(true);
+        seatRepository.save(seat);
         reservationRepository.delete(reservation);
     }
 
@@ -111,6 +115,7 @@ public class ReservationService {
     public void deleteReservationByAdmin(Long id){
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(()-> new IllegalArgumentException("예약 없음"));
+
         reservationRepository.delete(reservation);
     }
 
@@ -156,7 +161,7 @@ public class ReservationService {
 
         LocalTime now = LocalTime.now();
         if (now.isBefore(reservation.getEndTime().minusHours(1))) {
-            throw new IllegalArgumentException("예약 종료 1시간부터 연장이 가능합니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "예약 종료 1시간부터 연장이 가능합니다.");
         }
 
         LocalDate date = reservation.getDate();

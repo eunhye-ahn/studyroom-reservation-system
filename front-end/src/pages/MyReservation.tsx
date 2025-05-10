@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
+import {ReservationTimer} from "../components/ReservationTimer.tsx";
 
 interface MyReserve {
-    userEmail: String;
-    readingRoomName: String;
+    userEmail: string;
+    readingRoomName: string;
     seatNumber: number;
-    date: String;
-    startTime: String;
-    endTime: String;
+    date: string;
+    startTime: string;
+    endTime: string;
     id: number;
 }
 
@@ -18,9 +19,11 @@ function MyReservation() {
         const res = await axiosInstance.get("/reservation/my");
         setMyReserveInfo(res.data);
     }
-    useEffect(() => {
 
+    useEffect(() => {
         fetchMyReserveData();
+
+
     }, []);
 
     async function handleCancel(id: number) {
@@ -36,6 +39,25 @@ function MyReservation() {
         }
     }
 
+    async function handleExtension(id:number){
+        try{
+            await axiosInstance.post(`/reservation/${id}/extend`);
+        alert("예약이 연장되었습니다.");
+        }
+        catch(error:any){
+    let msg = "예약 연장 실패";
+
+    if (error.response?.data) {
+        if (typeof error.response.data === "string") {
+            msg = error.response.data;
+        } else if (typeof error.response.data.message === "string") {
+            msg = error.response.data.message;
+        }
+    }
+
+    alert(msg);
+}}
+
     return (
         <div>
             <h2>내 예약 목록</h2>
@@ -50,7 +72,11 @@ function MyReservation() {
                             <div>
                                 시간 : {res.startTime} ~ {res.endTime}
                             </div>
+                            <div>
+                                남은 시간 : <ReservationTimer endTime={`${res.date}T${res.endTime}`} />
+                            </div>
                             <button onClick={() =>  handleCancel(res.id) }>취소하기</button>
+                            <button onClick={()=>handleExtension(res.id)}>연장하기</button>
                         </li>
                     ))}
                 </ul>
@@ -60,6 +86,6 @@ function MyReservation() {
 
         </div>
     )
-}
 
+}
 export default MyReservation;
