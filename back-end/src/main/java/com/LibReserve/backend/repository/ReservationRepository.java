@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -36,4 +37,10 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
+
+    //종료된 예약 찾기
+    @Query("SELECT r FROM Reservation r WHERE " +
+            "r.seat.available = false "+
+            "AND FUNCTION('TIMESTAMP', r.date, r.endTime) <= :now")
+    List<Reservation> findExpiredReservations(@Param("now") LocalDateTime now);
 }

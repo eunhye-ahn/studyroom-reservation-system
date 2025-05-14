@@ -9,7 +9,16 @@ public class AdminReservationRequest {
     private Long seatId;
     private LocalDate date;
     private LocalTime startTime;
+    private LocalDate endDate;
     private LocalTime endTime;
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
     public LocalDate getDate() {
         return date;

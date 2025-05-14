@@ -10,10 +10,12 @@ import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,27 +43,29 @@ public class ReservationService {
 
     public void createReservation(String email, ReservationRequest request){
         User user = userRepository.findByEmail(email)
-                .orElseThrow(()->new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN,"사용자 정보를 찾을 수 없습니다."));
         Seat seat = seatRepository.findById(request.getSeatId())
-                .orElseThrow(()-> new IllegalArgumentException("스터디룸을 찾을 수 없습니다."));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN,"스터디룸을 찾을 수 없습니다."));
 
         LocalDate date = LocalDate.now();
         LocalTime startTime = LocalTime.now().withSecond(0).withNano(0);
         LocalTime endTime = startTime.plusHours(3);
+        LocalDate endDate = endTime.isBefore(startTime) ? date.plusDays(1) : date;
 
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
-                seat, date, startTime, endTime
+                seat, date, startTime,endTime
         );
 
         if(exists){
-            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 예약된 좌석입니다.");
         }
 
         Reservation reservation = new Reservation(user,
-                date, startTime, endTime,seat,0);
+                date, startTime, endDate, endTime,seat,0);
 
         seat.setAvailable(false);
         reservationRepository.save(reservation);
+
     }
 
     public List<ReservationResponse> getMyReservations(String email){
@@ -73,9 +77,9 @@ public class ReservationService {
 
     public void cancelReservation(Long reservationId, String email){
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(()-> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN,"예약 정보를 찾을 수 없습니다."));
         if(!reservation.getUser().getEmail().equals(email)){
-            throw new IllegalArgumentException("본인의 예약만 취소할 수 있습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"본인의 예약만 취소할 수 있습니다.");
         }
         Seat seat = reservation.getSeat();
         seat.setAvailable(true);
@@ -92,29 +96,30 @@ public class ReservationService {
 
     public ReservationResponse createReservationByAdmin(AdminReservationRequest request){
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow( ()->new IllegalArgumentException("사용자 없음"));
+                .orElseThrow( ()->new ResponseStatusException(HttpStatus.FORBIDDEN,"사용자 없음"));
         Seat seat = seatRepository.findById(request.getSeatId())
-                .orElseThrow(()->new IllegalArgumentException("좌석 없음"));
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN,"좌석 없음"));
 
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
                 seat, request.getDate(), request.getStartTime(), request.getEndTime()
         );
 
         if(exists){
-            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 예약된 좌석입니다.");
         }
 
         Reservation reservation = new Reservation(user,
-                request.getDate(), request.getStartTime(), request.getEndTime(),seat, 0);
+                request.getDate(), request.getStartTime(),request.getEndDate(), request.getEndTime(),seat, 0);
         seat.setAvailable(false);
         reservationRepository.save(reservation);
 
         return new ReservationResponse(reservation);
+
     }
 
     public void deleteReservationByAdmin(Long id){
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("예약 없음"));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN,"예약 없음"));
 
         reservationRepository.delete(reservation);
     }
@@ -125,7 +130,7 @@ public class ReservationService {
         LocalTime end = LocalTime.now().plusHours(3);
 
         ReadingRoom room = readingRoomRepository.findById(roomId)
-                .orElseThrow(()->new IllegalArgumentException("해당 열람실이 존재하지 않습니다."));
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN,"해당 열람실이 존재하지 않습니다."));
 
         List<Seat> seats = seatRepository.findByReadingRoom(room);
 
@@ -156,7 +161,7 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("본인만 예약을 연장할 수 있습니다."));
 
         if (reservation.getExtensionCount() > 3) {
-            throw new IllegalArgumentException("하루 최대 연장 횟수(3회)를 초과했습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"하루 최대 연장 횟수(3회)를 초과했습니다.");
         }
 
         LocalTime now = LocalTime.now();
@@ -167,19 +172,21 @@ public class ReservationService {
         LocalDate date = reservation.getDate();
         LocalTime newStart = now;
         LocalTime newEnd = now.plusHours(3);
+        LocalDate newEndDate = newEnd.isBefore(newStart) ? date.plusDays(1) : date;
 
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
                 reservation.getSeat(), date, newStart, newEnd
         );
 
         if (exists) {
-            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 예약된 좌석입니다.");
         }
 
         Reservation newReservation = new Reservation(
                 reservation.getUser(),
                 date,
                 newStart,
+                newEndDate,
                 newEnd,
                 reservation.getSeat(),
                 reservation.getExtensionCount()+1
@@ -187,5 +194,14 @@ public class ReservationService {
         reservationRepository.save(newReservation);
 
         return new ReservationResponse(newReservation);
+    }
+
+    public int getExtensionCount(Long reservationId, String email) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(()-> new RuntimeException("예약을 찾을 수 없습니다."));
+        if(!reservation.getUser().getEmail().equals(email)){
+            throw new RuntimeException("해당 예약에 접근할 수 없습니다.");
+        }
+        return reservation.getExtensionCount();
     }
 }

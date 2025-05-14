@@ -31,7 +31,7 @@ public class ReservationController {
         String email = jwtUtil.getEmailFromToken(token);
 
         reservationService.createReservation(email, request);
-        return ResponseEntity.ok("예약 완료되었습니다.");
+        return ResponseEntity.ok("예약 생성 완료 : "+ request);
     }
 
     @GetMapping
@@ -79,6 +79,16 @@ public class ReservationController {
         ReservationResponse response = reservationService.extendReservation(reservaionId, email);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{reservationId}/extend")
+    public ResponseEntity<Integer> getExtensionCount(@PathVariable Long reservationId,
+                                                     HttpServletRequest httpRequest) {
+        String token = getTokenFromRequest(httpRequest);
+        String email = jwtUtil.getEmailFromToken(token);
+
+        int extensionCount = reservationService.getExtensionCount(reservationId, email);
+        return ResponseEntity.ok(extensionCount);
                                                     }
 
 }

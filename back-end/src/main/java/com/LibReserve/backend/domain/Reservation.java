@@ -3,6 +3,7 @@ package com.LibReserve.backend.domain;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -15,6 +16,7 @@ public class Reservation {
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
+    private LocalDate endDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -27,6 +29,15 @@ public class Reservation {
     @Column(nullable = false)
     private int extensionCount = 0;
 
+    @Column(name = "end_date", nullable = false)
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
     public int getExtensionCount() {
         return extensionCount;
     }
@@ -35,13 +46,21 @@ public class Reservation {
         this.extensionCount = extensionCount;
     }
 
+    public LocalDateTime getEndDateTime() {
+        if (endDate == null) {
+            throw new IllegalStateException("endDate가 설정되지 않았습니다.");
+        }
+        return LocalDateTime.of(this.endDate, this.endTime);
+    }
+
     public Reservation() {
     }
 
-    public Reservation(User user, LocalDate date, LocalTime startTime, LocalTime endTime, Seat seat, int extensionCount) {
+    public Reservation(User user, LocalDate date, LocalTime startTime,LocalDate endDate, LocalTime endTime, Seat seat, int extensionCount) {
         this.user = user;
         this.date = date;
         this.startTime = startTime;
+        this.endDate = endDate;
         this.endTime = endTime;
         this.seat = seat;
         this.extensionCount = extensionCount;
