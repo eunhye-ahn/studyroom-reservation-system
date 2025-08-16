@@ -1,34 +1,34 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-
-interface RoomInfo {
-    categoryType : 'general_pc' | 'group_study' | 'personal_carrel';
-    subcategory : 'PERSON_1' | 'PERSON_2' |'PERSON_4' | 'PERSON_6' | 'PERSON_12';
-    floor : number;
-    name: string;
-    reservationType: 'SEAT_RESERVATION' | 'ROOM_RESERVATION';
-    totalSeats : number;
-    availableSeats : number;
-  }
+import { RoomInfo } from "../api/rooms";
 
 interface RoomStore {
-  room: RoomInfo | null;
-  setRoom: (user: RoomInfo) => void;
-  clearRoom: () => void;
+    selectedCategory: 'general_pc' | 'group_study' | 'personal_carrel' | null;
+    rooms : RoomInfo[]
+    currentRoom : RoomInfo | null;
+
+    setSelectedCategory:(category: 'general_pc' | 'group_study' | 'personal_carrel') => void;
+    setRooms: (rooms: RoomInfo[]) => void;
+    setCurrentRoom: (room: RoomInfo) => void;
+    clearRoom: () => void;
 }
 
 
 const useRoomStore = create<RoomStore>()(
-  persist(
-    (set) => ({
-      room: null,
-      setRoom: (room) => set({ room }),
-      clearRoom: () => set({ room: null }),
-    }),
-    {
-      name: "room-store", // localStorage key
-    }
-  )
+    persist(
+        (set) => ({
+            selectedCategory: 'general_pc',
+            rooms: [],
+            currentRoom: null,
+            setSelectedCategory: (category) => set({ selectedCategory: category }),
+            setRooms: (rooms) => set({ rooms }),
+            setCurrentRoom: (room) => set({ currentRoom: room }),
+            clearRoom: () => set({ currentRoom: null }),
+        }),
+        {
+            name: "room-store",
+        }
+    )
 );
+
 export default useRoomStore;

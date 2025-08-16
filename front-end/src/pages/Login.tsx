@@ -4,39 +4,64 @@ import { useNavigate, Link } from 'react-router-dom';
 import useUserStore from "../stores/useUserStore";
 import SignUp from './SignUp';
 import axiosInstance from '../api/axiosInstance';
+import { login, fetchMe } from '../api/auth';
 
 const Login = () => {
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
     const {setUser} = useUserStore();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-        try {
-            const res = await axios.post("/api/auth/login", {
-                email,
-                password
-            }, { headers: { 'Content-Type': 'application/json' } });
-            const accessToken = res.data.accessToken;
-            localStorage.setItem("accessToken", accessToken);
-            console.log("로그인토큰", accessToken);
-            alert("로그인 성공!")
+  try {
+    const { accessToken } = await login(email, password);
+    localStorage.setItem("accessToken", accessToken);
 
-const me = await axiosInstance.get("/api/auth/me", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      setUser(me.data);
+    const me = await fetchMe();
+    setUser(me);
+
+    alert("로그인 성공!");
+    navigate("/home");
+  } catch (error) {
+    alert("로그인 실패!");
+  }
+};
+
+// const Login = () => {
+//     const [email, setEmail] = useState("");
+//     const [password, setPassword] = useState("");
+//     const navigate = useNavigate();
+//     const {setUser} = useUserStore();
+
+//     const handleSubmit = async (e: React.FormEvent) => {
+//         e.preventDefault();
+
+//         try {
+//             const res = await axios.post("/api/auth/login", {
+//                 email,
+//                 password
+//             }, { headers: { 'Content-Type': 'application/json' } });
+//             const accessToken = res.data.accessToken;
+//             localStorage.setItem("accessToken", accessToken);
+//             console.log("로그인토큰", accessToken);
+//             alert("로그인 성공!")
+
+// const me = await axiosInstance.get("/api/auth/me", {
+//         headers: { Authorization: `Bearer ${accessToken}` },
+//       });
+//       setUser(me.data);
             
 
 
-            navigate("/home");
+//             navigate("/home");
 
-        } catch (error) {
-            alert("로그인 실패!");
-        }
-    };
+//         } catch (error) {
+//             alert("로그인 실패!");
+//         }
+//     };
 
     return (
         <div className='flex min-h-screen'>

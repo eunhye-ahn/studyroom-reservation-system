@@ -1,4 +1,5 @@
 import useUserStore from "../../stores/useUserStore";
+import RoomAsideList from "./RoomAsideList";
 
 const AsideSection = () => {
     const {user} = useUserStore();
@@ -16,6 +17,9 @@ const AsideSection = () => {
             ):(
                 <p>로그인이 필요합니다.</p>
             )}
+        </div>
+        <div>
+            <RoomAsideList/>
         </div>
         </>
         
