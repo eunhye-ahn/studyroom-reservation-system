@@ -7,7 +7,7 @@ import com.LibReserve.backend.domain.Subcategory;
 public class ReadingRoomResponse {
     private Long id;
     private String name;
-    private CategoryType category;
+    private CategoryType categoryType;
     private Subcategory subcategory;
     private int floor;
     private int totalSeats;
@@ -16,7 +16,7 @@ public class ReadingRoomResponse {
     public ReadingRoomResponse(ReadingRoom room) {
         this.id = room.getId();
         this.name = room.getName();
-        this.category = room.getCategoryType();
+        this.categoryType = room.getCategoryType();
         this.subcategory = room.getSubcategory();
         this.floor = room.getFloor();
         this.totalSeats = room.getSeats().size();
@@ -57,12 +57,12 @@ public class ReadingRoomResponse {
         this.availableSeats = availableSeats;
     }
 
-    public CategoryType getCategory() {
-        return category;
+    public CategoryType getCategoryType() {
+        return categoryType;
     }
 
     public void setCategory(CategoryType category) {
-        this.category = category;
+        this.categoryType = category;
     }
 
     public Subcategory getSubcategory() {
