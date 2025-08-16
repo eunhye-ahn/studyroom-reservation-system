@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
-import {ReservationTimer} from "../components/ReservationTimer.tsx";
+import {ReservationTimer} from "../components/ReservationTimer";
 import dayjs from "dayjs";
 
 interface MyReserve {

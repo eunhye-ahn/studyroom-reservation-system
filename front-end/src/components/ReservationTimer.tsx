@@ -38,3 +38,5 @@ export const ReservationTimer = ({ endTime }: TimerProps) => {
 
   return <span>{remaining}</span>;
 };
+
+export default ReservationTimer;

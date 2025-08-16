@@ -1,51 +1,20 @@
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance";
-
-interface UserInfo {
-    name: string;
-    email: string;
-    role: 'USER' | 'ADMIN';
-  }
+import useUserStore from "../stores/useUserStore";
 
 function Profile(){
-    const [userInfo,setUserInfo] = useState<UserInfo>();
-    const navigate = useNavigate();
+    const user = useUserStore((state) => state.user);
 
-    async function fetchMyData(){
-                await axiosInstance.get("/api/auth/me")
-        .then((res) => {
-            console.log("응답 데이터:", res.data);
-          setUserInfo(res.data);
-        })
-        .catch((err) => {
-          console.error("사용자 정보 조회 실패", err);
-          alert("로그인을 다시 해주세요.");
-          navigate("/login");
-        });
-    }
 
-    useEffect(()=>{
-        const token = localStorage.getItem("accessToken");
-        console.log("보내는 토큰", token);
-        if(!token){
-            alert("로그인이 필요합니다.");
-            navigate("/login");
-            return;
-        }
-        fetchMyData();
-    }, [navigate]);
-    if(!userInfo){
-        return <div>loading...</div>
-    }
+  if (!user) {
+    return <div>로그인 정보 없음</div>;
+  }
 
 
     return(
         <div>
             <h2>나의 프로필</h2>
-            <p><strong>이름: </strong>{userInfo.name}</p>
-            <p><strong>이메일: </strong>{userInfo.email}</p>
-            <p><strong>역할: </strong>{userInfo.role}</p>
+            <p><strong>이름: </strong>{user.name}</p>
+            <p><strong>이메일: </strong>{user.email}</p>
+            <p><strong>역할: </strong>{user.role}</p>
         </div>
     )
 }
