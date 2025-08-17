@@ -3,11 +3,14 @@ import { persist } from "zustand/middleware";
 import { RoomInfo } from "../api/rooms";
 
 interface RoomStore {
-    selectedCategory: 'general_pc' | 'group_study' | 'personal_carrel' | null;
+    
+    selectedFloor: number;
+    selectedCategory: string;
     rooms : RoomInfo[]
     currentRoom : RoomInfo | null;
 
-    setSelectedCategory:(category: 'general_pc' | 'group_study' | 'personal_carrel') => void;
+    setSelectedFloor:(floor: number) => void;
+    setSelectedCategory: (category: string) => void;
     setRooms: (rooms: RoomInfo[]) => void;
     setCurrentRoom: (room: RoomInfo) => void;
     clearRoom: () => void;
@@ -17,9 +20,12 @@ interface RoomStore {
 const useRoomStore = create<RoomStore>()(
     persist(
         (set) => ({
-            selectedCategory: 'general_pc',
+            selectedFloor: 1,
+            selectedCategory: "자료관",
             rooms: [],
             currentRoom: null,
+            
+            setSelectedFloor: (floor) => set({ selectedFloor: floor }),
             setSelectedCategory: (category) => set({ selectedCategory: category }),
             setRooms: (rooms) => set({ rooms }),
             setCurrentRoom: (room) => set({ currentRoom: room }),

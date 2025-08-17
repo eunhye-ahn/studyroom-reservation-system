@@ -1,9 +1,13 @@
 import axiosInstance from "./axiosInstance";
 
+type CategoryType = {
+  name: "DATA_CENTER" | "STUDY_CENTER";
+  displayName: string;
+};
+
 export interface RoomInfo {
   id: number;
-  categoryType: 'general_pc' | 'group_study' | 'personal_carrel';
-  subcategory: 'PERSON_1' | 'PERSON_2' | 'PERSON_4' | 'PERSON_6' | 'PERSON_12';
+  categoryType: CategoryType;
   floor: number;
   name: string;
   reservationType: 'SEAT_RESERVATION' | 'ROOM_RESERVATION';
@@ -12,7 +16,13 @@ export interface RoomInfo {
 }
 
 
+// export async function fetchRooms(): Promise<RoomInfo[]> {
+//   const response = await axiosInstance.get<RoomInfo[]>("/rooms");
+//   return response.data;
+// }
+
 export async function fetchRooms(): Promise<RoomInfo[]> {
-  const response = await axiosInstance.get<RoomInfo[]>("/rooms");
-  return response.data;
+  const res = await axiosInstance.get("/rooms");
+  console.log("서버 응답 rooms:", res.data); // 👈 이거 찍어보기
+  return res.data;
 }

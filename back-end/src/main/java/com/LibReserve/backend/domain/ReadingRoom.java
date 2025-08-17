@@ -15,10 +15,6 @@ public class ReadingRoom {
     @Column(nullable = false)
     private CategoryType categoryType;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Subcategory subcategory;
-
     @Column
     private Integer floor;
 
@@ -76,14 +72,6 @@ public class ReadingRoom {
 
     public void setCategoryType(CategoryType categoryType) {
         this.categoryType = categoryType;
-    }
-
-    public Subcategory getSubcategory() {
-        return subcategory;
-    }
-
-    public void setSubcategory(Subcategory subcategory) {
-        this.subcategory = subcategory;
     }
 
     public Integer getFloor() {

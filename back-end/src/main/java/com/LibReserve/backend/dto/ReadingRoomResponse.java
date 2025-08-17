@@ -2,13 +2,11 @@ package com.LibReserve.backend.dto;
 
 import com.LibReserve.backend.domain.CategoryType;
 import com.LibReserve.backend.domain.ReadingRoom;
-import com.LibReserve.backend.domain.Subcategory;
 
 public class ReadingRoomResponse {
     private Long id;
     private String name;
     private CategoryType categoryType;
-    private Subcategory subcategory;
     private int floor;
     private int totalSeats;
     private int availableSeats;
@@ -17,7 +15,6 @@ public class ReadingRoomResponse {
         this.id = room.getId();
         this.name = room.getName();
         this.categoryType = room.getCategoryType();
-        this.subcategory = room.getSubcategory();
         this.floor = room.getFloor();
         this.totalSeats = room.getSeats().size();
         this.availableSeats = (int)room.getSeats().stream()
@@ -63,14 +60,6 @@ public class ReadingRoomResponse {
 
     public void setCategory(CategoryType category) {
         this.categoryType = category;
-    }
-
-    public Subcategory getSubcategory() {
-        return subcategory;
-    }
-
-    public void setSubcategory(Subcategory subcategory) {
-        this.subcategory = subcategory;
     }
 
     public int getFloor() {

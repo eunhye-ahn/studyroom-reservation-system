@@ -1,63 +1,80 @@
 import useRoomStore from "../../stores/useRoomStore";
-import { useEffect } from "react";
-import { fetchRooms } from "../../api/rooms";
+import { useEffect, useMemo, useState } from "react";
+import { fetchRooms, RoomInfo } from "../../api/rooms";
+import { useNavigate } from "react-router-dom";
 
 const RoomAsideList = () => {
-  const { rooms, selectedCategory , setRooms} = useRoomStore();
-
-  const filtered = selectedCategory
-    ? rooms.filter((room) => room.categoryType === selectedCategory)
-    : [];
-
-     useEffect(() => {
-    if (rooms.length === 0) {
-      fetchRooms()
-        .then((data) => {
-          setRooms(data);
-          console.log("방 목록 로드됨:", data);
-        })
-        .catch((err) => {
-          console.error("방 목록 로드 실패", err);
-        });
-    }
-  }, []);
-
-    const roomsByFloor = filtered.reduce((acc: Record<number, typeof filtered>, room) => {
-    if (!acc[room.floor]) acc[room.floor] = [];
-    acc[room.floor].push(room);
-    return acc;
-  }, {});
+  const { rooms, selectedFloor, selectedCategory, setSelectedCategory } = useRoomStore();
+    const navigate = useNavigate();
 
 
-  //     useEffect(() => {
-  //   console.log("rooms 상태:", rooms);
-  // }, [rooms]);
+  const filteredRooms = useMemo(() => {
+    return rooms
+      .filter((room) => room.floor === selectedFloor)
+      .filter((room) => room.categoryType?.displayName === selectedCategory);
+  }, [rooms, selectedFloor, selectedCategory])
 
-  // useEffect(() => {
-  //   console.log("선택된 카테고리:", selectedCategory);
-  // }, [selectedCategory]);
+
   return (
-    <aside >
-      {filtered.length === 0 && <p>해당 카테고리의 방이 없습니다.</p>}
-{Object.entries(roomsByFloor)
-        .sort(([a], [b]) => Number(a) - Number(b)) // 층 순 정렬
-        .map(([floor, rooms]) => (
-          <div key={floor} className="mb-4">
-            <h4 className="font-semibold mb-1">{floor}층</h4>
-            <ul className="space-y-1">
-              {rooms.map((room) => (
-                <li key={room.id} className="ml-2 text-sm">
-                  <span>{room.name}</span><br />
-                  <span className="text-xs">
+    <aside>
+      <div>
+        <button onClick={() => setSelectedCategory("자료관")
+        }
+          className="mt-8 mb-3 w-full h-11 bg-transparent hover:bg-[#3343F3] text-white px-3 py-1 rounded transition-colors border border-black"
+        >
+          자료관
+        </button>
+
+        {selectedCategory === "자료관" && (
+          filteredRooms.length > 0 ? (
+            <ul>
+              {filteredRooms.map((room) => (
+                <li key={room.id}>
+                  <div
+                    onClick={() => navigate(`/rooms/${room.id}`)}
+
+                  >{room.name}</div>
+                  <div>
                     좌석: {room.availableSeats}/{room.totalSeats}
-                  </span>
+                  </div>
                 </li>
               ))}
             </ul>
-          </div>
-        ))}
+          ) : (
+            <p>자료관에 방이 없습니다.</p>
+          )
+        )}
+      </div>
+      <div>
+        <button
+          onClick={() => setSelectedCategory("학습관")}
+          className="mt-8 mb-3 w-full h-11 bg-transparent hover:bg-[#3343F3] text-white px-3 py-1 rounded transition-colors border border-black"
+
+        >
+          학습관
+        </button>
+
+        {selectedCategory === "학습관" && (
+          filteredRooms.length > 0 ? (
+            <ul>
+              {filteredRooms.map((room) => (
+                <li key={room.id}>
+                  <div
+                  onClick={() => navigate(`/rooms/${room.id}`)}
+                  >{room.name}</div>
+                  <div>
+                    좌석: {room.availableSeats}/{room.totalSeats}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>학습관에 방이 없습니다.</p>
+          )
+        )}
+      </div>
     </aside>
-  );
-};
+  )
+}
 
 export default RoomAsideList;

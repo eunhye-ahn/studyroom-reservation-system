@@ -1,21 +1,47 @@
 import useRoomStore from "../../stores/useRoomStore";
-import React from "react";
+import React, { useEffect, useState } from "react";
+
 
 const Footer: React.FC=()=>{
-    const {selectedCategory, setSelectedCategory} = useRoomStore();
+    const {selectedFloor, setSelectedFloor} = useRoomStore();
+    const floors = [1, 2, 3, 4];
+
+    useEffect(() => {
+  console.log('selectedFloor:', selectedFloor, typeof selectedFloor);
+}, [selectedFloor]);
+    
 
     return(
-        <div>
-            <button onClick={()=>setSelectedCategory('general_pc')}>
-                일반/PC
-            </button>
-            <button onClick={()=>setSelectedCategory('group_study')}>
-                그룹 스터디
-            </button>
-            <button onClick={()=>setSelectedCategory('personal_carrel')}>
-                개인 캐럴
-            </button>
+        <div className="flex gap-8 text-2xl font-bold">
+            {floors.map((floor) => (
+                <button key={floor}
+                onClick={()=>{
+                    setSelectedFloor(floor)
+                }}
+                type="button" 
+className="w-18 h-11 bg-transparent 
+hover:bg-[#3343F3] hover:border-0 text-white px-3 py-1 rounded transition-colors border border-black">
+                    {floor}F
+                </button>
+            ))}
         </div>
+
+//         <div className="flex gap-4 justify-start">
+//             {floors.map((floor) => (
+//                 <button
+//                 key={floor}
+//                 onClick={()=> {
+//                     console.log(typeof selectedFloor, selectedFloor);  // ex) "string" "1"
+// console.log(typeof floor, floor);  
+//                     setSelectedFloor(floor)}}
+//                 className={`border px-4 py-2 rounded  transition-all duration-200 ${
+//                     selectedFloor === floor ? 'bg-blue-600 ' : 'g-gray-800 border-gray-500 hover:bg-gray-700'
+//                 }`}
+//                 >
+//                     {floor}F
+//                 </button>
+//             ))}
+//         </div>
     )
 }
 export default Footer;

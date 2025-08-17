@@ -1,9 +1,11 @@
 package com.LibReserve.backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum CategoryType {
-    general_pc("일반/PC"),
-    group_study("그룹 스터디실"),
-    personal_carrel("개인 캐럴");
+    DATA_CENTER("자료관"),
+    STUDY_CENTER("학습관");
 
     private final String displayName;
 
@@ -14,4 +16,5 @@ public enum CategoryType {
     public String getDisplayName() {
         return displayName;
     }
+
 }
