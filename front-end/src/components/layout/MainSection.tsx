@@ -5,8 +5,9 @@ const MainSection : React.FC=() => {
 
     return(
         <div>
-            <div className="px-30">
-                <img src="/map.png" alt="지도" />
+            <div className="flex justify-center items-center min-h-screen w-full -translate-y-10">
+                <img src="/map.png" alt="지도" 
+                className="w-200"/>
             </div>
         </div>
     )

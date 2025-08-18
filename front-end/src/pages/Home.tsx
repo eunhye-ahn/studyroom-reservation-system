@@ -8,7 +8,7 @@ function Home() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#777777]">
+        <div className="flex flex-col min-h-screen bg-[#2d2d2d]">
 
             <div>
                 <DateTimeDisplay/>
@@ -24,7 +24,7 @@ function Home() {
 
 
                 </main>
-                <aside className="w-[300px] bg-[#000000] opacity-67 p-6">
+                <aside className="w-[450px] bg-[#000000] opacity-67 p-6 relative">
                     <AsideSection />
                 </aside>
 

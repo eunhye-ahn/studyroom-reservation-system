@@ -19,9 +19,13 @@ const Footer: React.FC=()=>{
                     setSelectedFloor(floor)
                 }}
                 type="button" 
-className="w-18 h-11 bg-transparent 
-hover:bg-[#3343F3] hover:border-0 text-white px-3 py-1 rounded transition-colors border border-black">
-                    {floor}F
+className={`w-18 h-11 px-3 py-1 rounded border transition-colors 
+            ${
+              selectedFloor === floor
+                ? "bg-[#3343F3] border-0 text-white" // 선택된 상태 (hover 유지 효과)
+                : "bg-transparent border-gray-500 text-white hover:bg-[#3343F3] hover:border-0"
+            }`}
+        >                    {floor}F
                 </button>
             ))}
         </div>

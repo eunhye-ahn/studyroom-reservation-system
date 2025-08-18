@@ -10,7 +10,7 @@ const AsideSection = () => {
 
     return(
         <>
-        <div className="flex">
+        <div className="flex absoulte mt-8 ml-8 w-full justify-start gap-4">
             <div>
                 <img src="/icons/User.png" alt="유저"
                 onClick={() => navigate("/profile")}
@@ -30,6 +30,10 @@ const AsideSection = () => {
         </div>
         <div>
             <RoomAsideList/>
+        </div>
+        <div className="absolute bottom-8 w-full flex justify-center">
+            <img src="/icons/Logo.svg" alt="순천대학교" 
+            className="fixed flex justify-center bottom-8 w-80"/>
         </div>
         </>
         
