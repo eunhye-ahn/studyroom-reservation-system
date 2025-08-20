@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../../stores/useUserStore";
-import RoomAsideList from "./RoomAsideList";
+import RoomAsideList from "../aside/RoomAsideList";
 
 const AsideSection = () => {
     const {user} = useUserStore();

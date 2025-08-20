@@ -4,8 +4,20 @@ import { fetchRooms, RoomInfo } from "../../api/rooms";
 import { useNavigate } from "react-router-dom";
 
 const RoomAsideList = () => {
-  const { rooms, selectedFloor, selectedCategory, setSelectedCategory } = useRoomStore();
-    const navigate = useNavigate();
+  const { rooms, 
+    selectedFloor, 
+    selectedCategory, 
+    setSelectedCategory,
+    setRoomName,
+    setMode
+  } = useRoomStore();
+    
+  const navigate = useNavigate();
+
+  const handleClickRoom = (roomId: number, roomName: string) => {
+    setRoomName(roomName);
+    setMode('room');
+  }
 
 
   const filteredRooms = useMemo(() => {
@@ -38,8 +50,8 @@ const RoomAsideList = () => {
               {filteredRooms.map((room) => (
                 <li key={room.id} className="text-white">
                   <div
-                    onClick={() => navigate(`/rooms/${room.id}`)}
-
+                    onClick={() => handleClickRoom(room.id, room.name)}
+                    className="cursor-pointer"
                   >{room.name}</div>
                   <div>
                     좌석: {room.availableSeats}/{room.totalSeats}

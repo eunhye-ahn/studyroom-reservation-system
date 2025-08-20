@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 
 const Footer: React.FC=()=>{
-    const {selectedFloor, setSelectedFloor} = useRoomStore();
+    const {selectedFloor, setSelectedFloor, setMode} = useRoomStore();
     const floors = [1, 2, 3, 4];
 
     useEffect(() => {
@@ -17,9 +17,11 @@ const Footer: React.FC=()=>{
                 <button key={floor}
                 onClick={()=>{
                     setSelectedFloor(floor)
+                    setMode('floor');
                 }}
                 type="button" 
-className={`w-18 h-11 px-3 py-1 rounded border transition-colors 
+className={`w-18 h-11 px-3 py-1 rounded border transition-colors,
+    cursor-pointer 
             ${
               selectedFloor === floor
                 ? "bg-[#3343F3] border-0 text-white" // 선택된 상태 (hover 유지 효과)
