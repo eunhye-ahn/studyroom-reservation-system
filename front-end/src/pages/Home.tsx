@@ -20,15 +20,10 @@ function Home() {
                     <MainSection />
                     <button onClick={() => navigate("/myReservation")}>나의 자리</button>
                     <button onClick={() => navigate("/roomList")}>열람실</button>
-
-
-
                 </main>
                 <aside className="w-[450px] bg-[#000000] opacity-67 p-6 relative">
                     <AsideSection />
                 </aside>
-
-
             </div>
 
             <footer className=" fixed bottom-10 left-15  w-full">

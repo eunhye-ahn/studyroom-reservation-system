@@ -5,72 +5,72 @@ import useUserStore from "../stores/useUserStore";
 import SignUp from './SignUp';
 import axiosInstance from '../api/axiosInstance';
 import { login, fetchMe } from '../api/auth';
+import { MyReserve } from '../api/type';
+import dayjs from 'dayjs';
+import { ActiveReservationModal } from '../components/ActiveReservationModal';
 
 const Login = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const {setUser} = useUserStore();
+    const { setUser } = useUserStore();
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    const [activeItem, setActiveItem] = useState<MyReserve | null>(null);
 
-  try {
-    const { accessToken } = await login(email, password);
-    localStorage.setItem("accessToken", accessToken);
-
-    const me = await fetchMe();
-    setUser(me);
-
-    alert("로그인 성공!");
-    navigate("/home");
-  } catch (error) {
-    alert("로그인 실패!");
-  }
-};
-
-// const Login = () => {
-//     const [email, setEmail] = useState("");
-//     const [password, setPassword] = useState("");
-//     const navigate = useNavigate();
-//     const {setUser} = useUserStore();
-
-//     const handleSubmit = async (e: React.FormEvent) => {
-//         e.preventDefault();
-
-//         try {
-//             const res = await axios.post("/api/auth/login", {
-//                 email,
-//                 password
-//             }, { headers: { 'Content-Type': 'application/json' } });
-//             const accessToken = res.data.accessToken;
-//             localStorage.setItem("accessToken", accessToken);
-//             console.log("로그인토큰", accessToken);
-//             alert("로그인 성공!")
-
-// const me = await axiosInstance.get("/api/auth/me", {
-//         headers: { Authorization: `Bearer ${accessToken}` },
-//       });
-//       setUser(me.data);
-            
+    //현재 예약 중인지 검사
+    function isActive(r: MyReserve) {
+        const now = dayjs();
+        const start = dayjs(`${r.date}T${r.startTime}`);
+        const end = dayjs(`${r.date}T${r.endTime}`);
+        return now.isAfter(start) && now.isBefore(end);
+    }
 
 
-//             navigate("/home");
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-//         } catch (error) {
-//             alert("로그인 실패!");
-//         }
-//     };
+        try {
+            const { accessToken } = await login(email, password);
+            localStorage.setItem("accessToken", accessToken);
+
+            const me = await fetchMe();
+            setUser(me);
+
+            alert("로그인 성공!");
+
+            const list: MyReserve[] = await axiosInstance.get("/reservation/my").then(r => r.data);
+            const activeList = list.filter(isActive);
+            if (activeList.length > 0) {setActiveItem(activeList[0]);}
+            else {navigate("/home");}
+
+
+        } catch (error) {
+            alert("로그인 실패!");
+
+        }
+    };
+
+    async function cancelNow(id: number) {
+        await axiosInstance.delete(`/reservation/${id}`);
+        alert("예약이 취소되었습니다.");
+        setActiveItem(null);
+        navigate("/home");
+
+    }
+
+
+
+
 
     return (
-        <div className='flex min-h-screen'>
-            
-            <div className='flex-[4]  flex flex-col items-center justify-center gap-2'>
+        <div className='flex min-h-screen justify-center items-center '>
 
-                <img src="/icons/Logo.svg" alt="" className='w-[400px] px-[8px]'/><br />
+            <div className='flex flex-col items-center justify-center gap-2 border border-gray-200 rounded-2xl shadow-sm p-6 md:p-20'>
 
-                <form onSubmit={handleSubmit} className='w-[400px] px-[8px] space-y-5'>
+                <img src="/icons/Logo.svg" alt="" className='w-[400px] px-[8px]' /><br />
+
+                <form onSubmit={handleSubmit} className='w-[400px] px-[8px] space-y-5 '>
                     <label htmlFor="email">Email address <br /></label>
                     <input
                         type="email"
@@ -89,17 +89,20 @@ const handleSubmit = async (e: React.FormEvent) => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <br />
-                          <button type="submit" className='w-full'>Login now</button><br />
-                    <button onClick={()=> navigate("/signUp")} className='w-full'>Signup now</button>
+                    <button type="submit" className='w-full border border-gray-200 rounded-2xl p-3 shadow-sm cursor-pointer'>Login now</button><br />
+                    <button type="button" onClick={() => navigate("/signUp")} className='w-full  border border-gray-200 rounded-2xl p-3 shadow-sm cursor-pointer'>Signup now</button>
                 </form>
             </div>
-            
 
-            <div className='flex-[6] bg-gray-100 h-screen'>
-                <img src="/reperence.jpg" alt="이미지"
-                className='w-full h-full object-cover' />이미지
-            </div>
-            
+            {activeItem && (
+                <ActiveReservationModal
+                    item={activeItem}
+                    onCancel={cancelNow}
+                    onClose={() => setActiveItem(null)}
+                    onGoMyPage={() => { setActiveItem(null); }}
+                />
+            )}
+
         </div>
     );
 };

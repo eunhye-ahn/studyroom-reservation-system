@@ -4,7 +4,6 @@ import axiosInstance from "../api/axiosInstance";
 import createReservation from "../api/reservationApi";
 
 
-
 interface SeatList {
     id : number,
     number : number,
@@ -75,7 +74,9 @@ function RoomDetail(){
 
     return(
         <div>
-            <h2>열람실 {roomId} 좌석 현황</h2>
+            <div>
+                <img src="" alt="" />
+            </div>
             <div>
                 {seats.map((seat)=>(
                     <div key={seat.id}>

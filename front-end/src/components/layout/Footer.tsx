@@ -1,5 +1,6 @@
 import useRoomStore from "../../stores/useRoomStore";
 import React, { useEffect, useState } from "react";
+// import {FloorId} from "../../api/type"
 
 
 const Footer: React.FC=()=>{
@@ -32,22 +33,6 @@ className={`w-18 h-11 px-3 py-1 rounded border transition-colors,
             ))}
         </div>
 
-//         <div className="flex gap-4 justify-start">
-//             {floors.map((floor) => (
-//                 <button
-//                 key={floor}
-//                 onClick={()=> {
-//                     console.log(typeof selectedFloor, selectedFloor);  // ex) "string" "1"
-// console.log(typeof floor, floor);  
-//                     setSelectedFloor(floor)}}
-//                 className={`border px-4 py-2 rounded  transition-all duration-200 ${
-//                     selectedFloor === floor ? 'bg-blue-600 ' : 'g-gray-800 border-gray-500 hover:bg-gray-700'
-//                 }`}
-//                 >
-//                     {floor}F
-//                 </button>
-//             ))}
-//         </div>
     )
 }
 export default Footer;

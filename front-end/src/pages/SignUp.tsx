@@ -32,7 +32,7 @@ const SignUp = () =>{
             localStorage.setItem('token', token);
 
             alert("회원가입 및 로그인 성공!");
-            navigate('/rooms');
+            navigate('/home');
         }catch(error){
             alert('회원가입 실패!');
         }
