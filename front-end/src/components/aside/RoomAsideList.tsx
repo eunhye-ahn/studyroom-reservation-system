@@ -123,7 +123,7 @@ const RoomAsideList = () => {
           className={`mt-8 mb-3 w-full h-11 text-white rounded font-semibold text-2xl
             ${selectedCategory === "자료관"
               ? "bg-[#3343F3] border-0 "
-              : "bg-transparent border-gray-500 rounded hover:bg-[#3343F3]"
+              : "bg-transparent border border-gray-500 rounded hover:bg-[#3343F3]"
             }`}
         >
           자료관
@@ -131,7 +131,7 @@ const RoomAsideList = () => {
 
         {selectedCategory === "자료관" && (
           filteredRooms.length > 0 ? (
-            <ul>
+            <ul className="divide-y divide-gray-500">
               {filteredRooms.map((room) => (
                 <li key={room.id} className="text-white flex items-center justify-between pt-3 pb-3 gap-4">
                   <div
@@ -161,7 +161,7 @@ const RoomAsideList = () => {
           className={`mt-8 mb-3 w-full h-11 text-white rounded font-semibold text-2xl
             ${selectedCategory === "학습관"
               ? "bg-[#3343F3] border-0 "
-              : "bg-transparent  border-gray-500 rounded hover:bg-[#3343F3]"
+              : "bg-transparent border border-gray-500 rounded hover:bg-[#3343F3]"
             }`}
         >
           학습관
@@ -169,14 +169,15 @@ const RoomAsideList = () => {
 
         {selectedCategory === "학습관" && (
           filteredRooms.length > 0 ? (
-            <ul>
+            <ul className="divide-y divide-gray-500">
               {filteredRooms.map((room) => (
                 <li key={room.id} className="text-white  flex items-center justify-between pt-3 pb-3">
                   <div
-                    onClick={() => handleClickRoom}
+                    onClick={() => handleClickRoom(room.id, room.name)}
+                      className="cursor-pointer"
                   >{room.name}</div>
-                  <div className="w-54 h-6 bg-[#3343F3] rounded-full overflow-hidden flex-shrink-0">
-                    <div className="h-full bg-gray-200 text-xs text-white flex items-center justify-center"
+                  <div className="w-54 h-6 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                    <div className="h-full bg-[#3343F3] text-xs text-white flex items-center justify-center"
                       style={{
                         width: `${(room.availableSeats / room.totalSeats) * 100}%`,
                       }}>

@@ -12,7 +12,7 @@ interface RoomStore {
     selectedCategory: string | null;
     selectedRoom: RoomInfo[] | null;
     
-    selectedRoomId: RoomId | null;
+    selectedRoomId: RoomId;
     seatsInRoom: RoomInfo[]; //룸에 속한 seat 목록
     floorRooms: RoomInfo[]; //층에 속한 룸 목록 
     currentRoom: RoomInfo | null;
@@ -46,7 +46,7 @@ const useRoomStore = create<RoomStore>()(
             currentRoom: null,
             roomName: null,
             mode: 'floor',
-            selectedRoomId: null,
+            selectedRoomId: 1,
             seatsInRoom: [],
             floorRooms: [],
 
@@ -55,7 +55,7 @@ const useRoomStore = create<RoomStore>()(
                 const v = Number(floor);
             set({
                 selectedFloor: (Number.isFinite(v)? (v as FloorId):(1 as FloorId)),
-                selectedRoomId: null,
+                selectedRoomId: 1,
                 seatsInRoom: [],
                 mode: 'floor',
             });
@@ -64,7 +64,7 @@ const useRoomStore = create<RoomStore>()(
 
             openRoom: (seatId) =>
                 set({ selectedRoomId: seatId, seatsInRoom: [], mode: "room" }),
-            backToFloor: () => set({ selectedRoomId: null, seatsInRoom: [], currentRoom: null, mode: "floor" }),
+            backToFloor: () => set({ selectedRoomId: 1, seatsInRoom: [], currentRoom: null, mode: "floor" }),
 
             setSeatsInRoom: (rooms) => set({ seatsInRoom: rooms }),
             setFloorRooms: (rooms) => set({ floorRooms: rooms }),

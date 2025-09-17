@@ -7,6 +7,7 @@ import Profile from './pages/Profile';
 import RoomList from './pages/RoomList';
 import RoomDetail from './pages/RoomDetail';
 import MyReservation from './pages/MyReservation';
+import './index.css' 
 
 function App() {
 

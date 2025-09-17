@@ -15,6 +15,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html, body, #root, .app-shell {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
 a {
   font-weight: 500;
   color: #646cff;

@@ -40,8 +40,8 @@ export function ActiveReservationModal({
           <div className="text-sm">남은 시간: {remain} 남음</div>
         </div>
         <div className="flex justify-center gap-18">
-          <button className="w-30 px-3 py-2 rounded-xl bg-red-600 text-white" onClick={() => onCancel(item.id)}>반납</button>
-          <button className="w-30 px-3 py-2 rounded-xl border-amber-600" onClick={onClose}>닫기</button>
+          <button className="w-30 px-3 py-2 rounded-xl bg-[#2E22AC] text-white" onClick={() => onCancel(item.id)}>반납</button>
+          <button className="w-30 px-3 py-2 rounded-xl " onClick={onClose}>닫기</button>
         </div>
       </div>
     </div>

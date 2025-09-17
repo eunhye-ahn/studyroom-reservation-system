@@ -7,12 +7,17 @@ import SeatButton from "../SeatButton";
 import api from "axios";
 import { RoomInfo } from "../../api/rooms";
 import axiosInstance from "../../api/axiosInstance";
+import useSeatSocket from "../useSeatSocket";
+import { Seat } from "../../stores/useSeatStore";
 
 const MainSection: React.FC = () => {
 
 
     const { roomName, selectedFloor, selectedRoomId: selectedRoomId, openRoom: openArea, mode, setSeatsInRoom: setSeatsInRoom } = useRoomStore();
     const [roomImage, setRoomImage] = useState<string>("");
+    const [seats, setSeats] = useState<Seat[]>([]);
+
+
 
 
 
@@ -42,6 +47,15 @@ const MainSection: React.FC = () => {
             }
         }
     }, [selectedRoomId, mode]);
+
+    // 웹소켓 연결 → 상태 갱신
+useSeatSocket(selectedRoomId, (msg) => {
+  setSeats((prev) =>
+    prev.map((s) =>
+      s.id === msg.id ? { ...s, available: msg.available } : s
+    )
+  );
+});
 
 
 
@@ -101,6 +115,8 @@ const MainSection: React.FC = () => {
         console.log(hit.roomId);
     }
 
+    
+
 
     return (
         <div className="min-h-screen flex items-center justify-center -translate-y-10">
@@ -159,24 +175,6 @@ const MainSection: React.FC = () => {
                             }}
                         />
                     )}
-
-
-                    {/* {mode === "area" && selectedArea && (
-            <SeatButton
-              areaId={selectedArea}
-              onReserve={async (seatId) => {
-                try {
-                  const result = await reserveSeat(seatId);
-                  alert(`좌석 ${seatId} 예약 완료`);
-                  console.log(result);
-                } catch (e) {
-                  console.error(e);
-                  alert("예약 중 오류가 발생했습니다.");
-                }
-              }}
-            />
-          )}                 */}
-
                 </svg>
             </div>
         </div>
