@@ -14,7 +14,7 @@
 
 ---
 ## 실행 화면
-![메인화면](./mainImage.png)
+![메인화면](mainpage.png)
 
 ```
 
