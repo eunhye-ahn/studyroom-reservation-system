@@ -52,12 +52,20 @@ public class ReservationService {
         LocalTime endTime = startTime.plusHours(3);
         LocalDate endDate = endTime.isBefore(startTime) ? date.plusDays(1) : date;
 
+        //좌석 겹침
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
                 seat, date, startTime,endTime
         );
-
         if(exists){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 예약된 좌석입니다.");
+        }
+
+        //사용자 겹침
+        boolean userTaken = reservationRepository.existsByUserAndDateAndTimeOverlap(
+                user, date, startTime,endTime
+        );
+        if(userTaken){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 진행 중인 예약이 있습니다.");
         }
 
         Reservation reservation = new Reservation(user,

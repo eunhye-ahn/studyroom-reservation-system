@@ -7,14 +7,13 @@ import com.LibReserve.backend.dto.SeatStatusDto;
 import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.service.ReservationService;
+import com.LibReserve.backend.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reading-rooms")
@@ -23,6 +22,7 @@ public class SeatController {
     private final ReadingRoomRepository readingRoomRepository;
     private final SeatRepository seatRepository;
     private final ReservationService reservationService;
+    private final SeatService seatService;
 
     @GetMapping("/{roomId}/seats")
     public ResponseEntity<List<SeatResponse>> getSeatsByReadingRoom(@PathVariable Long roomId) {
@@ -38,6 +38,15 @@ public class SeatController {
     public List<SeatStatusDto> getRoomSeatStatus(@PathVariable Long roomId){
         RoomSeatStatusResponse status = reservationService.getRoomSeatStaus(roomId);
         return status.getSeatStatus();
+    }
+
+    @PostMapping("/{roomId}/seats/generate")
+    public ResponseEntity<Map<String, Integer>> generateSeats(
+            @PathVariable Long roomId, @RequestParam int count) {
+        ReadingRoom room = readingRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 열람실이 존재하지 않습니다."));
+        int created = seatService.createSeats(room, count);
+        return ResponseEntity.ok(Map.of("created", created));
     }
 
 }

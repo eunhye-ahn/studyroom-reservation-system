@@ -16,6 +16,9 @@ public class ReadingRoom {
     private CategoryType categoryType;
 
     @Column
+    private String subCategory;
+
+    @Column
     private Integer floor;
 
     @Column(nullable = false)

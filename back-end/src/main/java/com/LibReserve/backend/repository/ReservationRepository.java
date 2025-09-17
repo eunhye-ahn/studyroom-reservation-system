@@ -2,6 +2,7 @@ package com.LibReserve.backend.repository;
 
 import com.LibReserve.backend.domain.Reservation;
 import com.LibReserve.backend.domain.Seat;
+import com.LibReserve.backend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation,Long> {
     List<Reservation> findByUserEmail(String email);
 
-    // 예약 중복 확인
+    // 좌석 겹침 검사
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM Reservation r " +
             "WHERE r.seat = :seat AND r.date = :date " +
             "AND (r.startTime < :endTime AND r.endTime > :startTime)")
@@ -26,6 +27,23 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
+
+    // 같은날짜에, 해당 사용자의 시간대가 겹치면 true
+    @Query("""
+    select case when count(r) > 0 then true else false end
+    from Reservation r
+    where r.user = :user
+    and r.date = :date
+    and (r.startTime < :endTime and r.endTime > :startTime)
+""")
+    boolean existsByUserAndDateAndTimeOverlap(
+            @Param("user") User user,
+            @Param("date") LocalDate date,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime
+    );
+
+
 
     @Query("SELECT r.seat.id FROM Reservation r " +
             "WHERE r.seat.readingRoom.id = :roomId " +

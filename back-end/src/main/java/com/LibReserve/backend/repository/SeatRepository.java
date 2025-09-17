@@ -9,4 +9,10 @@ import java.util.List;
 
 public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByReadingRoom(ReadingRoom readingRoom);
+
+    //중복방지&정렬
+    boolean existsByReadingRoomIdAndNumber(Long roomId, int number);
+    List<Seat> findByReadingRoomOrderByNumberAsc(ReadingRoom room);
+
+
 }

@@ -70,6 +70,7 @@ public class ReservationController {
         return ResponseEntity.ok("예약이 취소되었습니다.");
     }
 
+    //예약연장
     @PostMapping("/{reservaionId}/extend")
     public ResponseEntity<ReservationResponse> extendReservation(@PathVariable Long reservaionId,
                                                     HttpServletRequest httpRequest) {
