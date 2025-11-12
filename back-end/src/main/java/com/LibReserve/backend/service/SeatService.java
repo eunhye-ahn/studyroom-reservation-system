@@ -4,6 +4,7 @@ import com.LibReserve.backend.domain.ReadingRoom;
 import com.LibReserve.backend.domain.Seat;
 import com.LibReserve.backend.dto.SeatResponse;
 import com.LibReserve.backend.dto.SeatStatusDto;
+import com.LibReserve.backend.dto.SeatStatusMessage;
 import com.LibReserve.backend.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

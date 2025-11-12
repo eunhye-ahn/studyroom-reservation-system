@@ -1,0 +1,55 @@
+package com.LibReserve.backend.dto;
+
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@Builder
+public class SeatStatusMessage {
+    private Long seatId;
+    private int number;
+    private SeatStatus status;
+    private Long userId;
+    private LocalDateTime timestamp;
+    private MessageType type;
+
+    public enum SeatStatus {
+        AVAILABLE,      // 이용 가능
+        OCCUPIED,       // 이용 중
+        RESERVED,       // 예약됨
+        OUT_OF_SERVICE  // 사용 불가
+    }
+
+    public enum MessageType {
+        STATUS_CHANGE,  // 좌석 상태 변경
+        HEARTBEAT,      // 연결 확인용
+        INITIAL_LOAD    // 초기 로드
+    }
+
+    public SeatStatusMessage withTimestamp() {
+        return new SeatStatusMessage(
+                this.seatId,
+                this.number,
+                this.status,
+                this.userId,
+                LocalDateTime.now(),
+                this.type
+        );
+
+    }
+
+    @Override
+    public String toString() {
+        return "SeatStatusMessage{" +
+                "seatId=" + seatId +
+                ", seatNumber='" + number + '\'' +
+                ", status=" + status +
+                ", userId='" + userId + '\'' +
+                ", timestamp=" + timestamp +
+                ", type=" + type +
+                '}';
+    }
+}

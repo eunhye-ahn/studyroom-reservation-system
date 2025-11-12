@@ -10,13 +10,13 @@ export const SEAT_BUTTON_BY_AREA: Record<RoomId, SeatButton[]> = {
         { seatId: 5, x: 470, y: 616, w: 25, h: 18, label: "5" },
         { seatId: 6, x: 410, y: 616, w: 25, h: 18, label: "6" },
         { seatId: 7, x: 360, y: 616, w: 25, h: 18, label: "7" },
-        // { seatId: 8, x: 360, y: 616, w: 25, h: 18, label: "8" },
+        { seatId: 8, x: 305, y: 613, w: 25, h: 18, label: "8" },
 
     ],
     2: [
 
-        { seatId: 8, x: 843, y: 574, w: 25, h: 18, label: "1" },
-        { seatId: 9, x: 842, y: 525, w: 25, h: 18, label: "2" },
+        { seatId: 9, x: 843, y: 574, w: 25, h: 18, label: "1" },
+        { seatId: 10, x: 842, y: 525, w: 25, h: 18, label: "2" },
         { seatId: 10, x: 842, y: 480, w: 25, h: 18, label: "3" },
         { seatId: 11, x: 842, y: 400, w: 25, h: 18, label: "4" },
         { seatId: 12, x: 842, y: 350, w: 25, h: 18, label: "5" },

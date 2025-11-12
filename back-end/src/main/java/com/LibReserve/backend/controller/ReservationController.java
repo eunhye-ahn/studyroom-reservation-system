@@ -4,20 +4,25 @@ import com.LibReserve.backend.config.JwtUtil;
 import com.LibReserve.backend.domain.Reservation;
 import com.LibReserve.backend.dto.ReservationRequest;
 import com.LibReserve.backend.dto.ReservationResponse;
+import com.LibReserve.backend.dto.SeatStatusMessage;
 import com.LibReserve.backend.service.ReservationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reservation")
 public class ReservationController {
     private final ReservationService reservationService;
     private final JwtUtil jwtUtil;
+
 
     public ReservationController(ReservationService reservationService, JwtUtil jwtUtil){
         this.reservationService = reservationService;
@@ -31,6 +36,9 @@ public class ReservationController {
         String email = jwtUtil.getEmailFromToken(token);
 
         reservationService.createReservation(email, request);
+
+
+
         return ResponseEntity.ok("예약 생성 완료 : "+ request);
     }
 

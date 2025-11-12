@@ -10,6 +10,7 @@ import com.LibReserve.backend.service.ReservationService;
 import com.LibReserve.backend.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,8 @@ public class SeatController {
     private final SeatRepository seatRepository;
     private final ReservationService reservationService;
     private final SeatService seatService;
+
+//    private final SimpMessagingTemplate messagingTemplate; //웹소켓 메시지 전송용
 
     @GetMapping("/{roomId}/seats")
     public ResponseEntity<List<SeatResponse>> getSeatsByReadingRoom(@PathVariable Long roomId) {
@@ -46,6 +49,7 @@ public class SeatController {
         ReadingRoom room = readingRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 열람실이 존재하지 않습니다."));
         int created = seatService.createSeats(room, count);
+
         return ResponseEntity.ok(Map.of("created", created));
     }
 

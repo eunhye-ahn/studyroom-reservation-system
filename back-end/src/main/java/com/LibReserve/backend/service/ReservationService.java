@@ -9,7 +9,9 @@ import com.LibReserve.backend.repository.ReservationRepository;
 import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,25 +23,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReadingRoomRepository readingRoomRepository;
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
 
+    private final SimpMessagingTemplate messagingTemplate;
+
     public List<Reservation> getReservationsByEmail(String email){
         return reservationRepository.findByUserEmail(email);
     }
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReadingRoomRepository readingRoomRepository,
-                              UserRepository userRepository,
-                              SeatRepository seatRepository) {
-        this.reservationRepository = reservationRepository;
-        this.readingRoomRepository = readingRoomRepository;
-        this.userRepository = userRepository;
-        this.seatRepository = seatRepository;
-    }
+//    public ReservationService(ReservationRepository reservationRepository,
+//                              ReadingRoomRepository readingRoomRepository,
+//                              UserRepository userRepository,
+//                              SeatRepository seatRepository) {
+//        this.reservationRepository = reservationRepository;
+//        this.readingRoomRepository = readingRoomRepository;
+//        this.userRepository = userRepository;
+//        this.seatRepository = seatRepository;
+//    }
 
     public void createReservation(String email, ReservationRequest request){
         User user = userRepository.findByEmail(email)
@@ -73,6 +78,21 @@ public class ReservationService {
 
         seat.setAvailable(false);
         reservationRepository.save(reservation);
+
+        //웹소켓 브로드캐스트
+        SeatStatusMessage message = SeatStatusMessage.builder()
+                .seatId(seat.getId())
+                .number(seat.getNumber())
+                .status(SeatStatusMessage.SeatStatus.OCCUPIED)
+                .type(SeatStatusMessage.MessageType.STATUS_CHANGE)
+                .build()
+                .withTimestamp();
+
+        messagingTemplate.convertAndSend(
+                "/topic/rooms/" + seat.getReadingRoom().getId() + "/seats",
+                message
+        );
+
 
     }
 

@@ -36,18 +36,19 @@ public class SecurityConfig {
 
 
         return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ 여기 추가
+                .cors(cors -> cors.disable())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/signUp","/api/auth/login").permitAll() // ✅ 로그인/회원가입 허용.requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/rooms").permitAll()
-                        .requestMatchers("/reservation/**").authenticated()
-                        .requestMatchers("/reading-rooms/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .anyRequest().permitAll()
+//                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                        .requestMatchers("/api/auth/signUp","/api/auth/login").permitAll() // ✅ 로그인/회원가입 허용.requestMatchers("/api/auth/me").authenticated()
+//                        .requestMatchers("/rooms").permitAll()
+//                        .requestMatchers("/reservation/**").authenticated()
+//                        .requestMatchers("/reading-rooms/**").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
 
-                        .anyRequest().authenticated()
+//                        .anyRequest().authenticated()
                         //나머지는 인증 필요
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil,userRepository), UsernamePasswordAuthenticationFilter.class)
@@ -68,4 +69,5 @@ public class SecurityConfig {
 
 
 }
+
 

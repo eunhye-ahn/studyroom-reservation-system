@@ -14,7 +14,7 @@ export interface SeatStore {
   selectedSeat: Seat | null;
   loading: boolean;
   
-  setSeats: (seats: Seat[]) => void;
+  setSeats: (seats: Seat[] | ((prev: Seat[]) => Seat[])) => void; 
   setSelectedSeat: (seat: Seat | null) => void;
   setLoading: (loading: boolean) => void;
   clearSeats: () => void;
@@ -27,7 +27,9 @@ const useSeatStore = create<SeatStore>()((set) => ({
   selectedSeat: null,
   loading: false,
   
-  setSeats: (seats) => set({ seats }),
+  setSeats: (seats) => set((state) => ({ 
+    seats: typeof seats === 'function' ? seats(state.seats) : seats 
+  })),
   setSelectedSeat: (seat) => set({ selectedSeat: seat }),
   setLoading: (loading) => set({ loading }),
   clearSeats: () => set({ seats: [], selectedSeat: null }),
