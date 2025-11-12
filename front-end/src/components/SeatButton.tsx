@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useCallback } from "react";
 import type { RoomId } from "../api/type"
 import { SEAT_BUTTON_BY_AREA } from "../constans/seats";
 import useRoomStore from "../stores/useRoomStore";
@@ -59,6 +59,12 @@ const combined: Seat[] = seatList.map((seat: any) => {
   useEffect(()=>{
       fetchSeatData();
   },[selectedRoomId]);
+
+
+  // 컴포넌트 마운트 시 초기 데이터 로드
+  useEffect(() => {
+    fetchSeatData();
+  }, [selectedRoomId]);
 
 return (
   <g>

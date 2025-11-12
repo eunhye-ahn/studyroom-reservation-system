@@ -12,19 +12,21 @@ import './index.css'
 function App() {
 
   return (
-    <BrowserRouter>
-      <Routes>
-      <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signUp" element={<SignUp/>} />
-        <Route path="/home" element={<Home/>}/>
-        <Route path="/profile" element={<Profile/>}/>
-        <Route path="/roomList" element={<RoomList/>}/>
-        <Route path="myReservation" element={<MyReservation/>}/>
-        <Route path="/rooms/:roomId" element={<RoomDetail/>}/>
 
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <Routes>
+        <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signUp" element={<SignUp/>} />
+          <Route path="/home" element={<Home/>}/>
+          <Route path="/profile" element={<Profile/>}/>
+          <Route path="/roomList" element={<RoomList/>}/>
+          <Route path="myReservation" element={<MyReservation/>}/>
+          <Route path="/rooms/:roomId" element={<RoomDetail/>}/>
+
+        </Routes>
+      </BrowserRouter>
+
 
   )
 }

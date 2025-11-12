@@ -11,5 +11,4 @@ public enum Role {
         LIBRARIAN,
         PROFESSOR,
         ADMIN
-
 }

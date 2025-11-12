@@ -7,8 +7,9 @@ import SeatButton from "../SeatButton";
 import api from "axios";
 import { RoomInfo } from "../../api/rooms";
 import axiosInstance from "../../api/axiosInstance";
-import useSeatSocket from "../useSeatSocket";
 import { Seat } from "../../stores/useSeatStore";
+
+
 
 const MainSection: React.FC = () => {
 
@@ -47,15 +48,6 @@ const MainSection: React.FC = () => {
             }
         }
     }, [selectedRoomId, mode]);
-
-    // 웹소켓 연결 → 상태 갱신
-useSeatSocket(selectedRoomId, (msg) => {
-  setSeats((prev) =>
-    prev.map((s) =>
-      s.id === msg.id ? { ...s, available: msg.available } : s
-    )
-  );
-});
 
 
 

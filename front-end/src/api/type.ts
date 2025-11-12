@@ -66,4 +66,3 @@ export type MyReserve = {
   startTime: string;
   endTime: string;
 };
-
