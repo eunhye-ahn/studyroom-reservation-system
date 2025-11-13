@@ -71,9 +71,9 @@ const MainSection: React.FC = () => {
         1: "map/1_book_A.jpg",
         2: "map/2_chang_A.jpg",
         3: "map/1_media_pc.jpg",
-        4: "map/2_study201.jpg",
-        5: "map/2_study202.jpg",
-        6: "map/1_eulim_A.jpg",
+        4: "map/1_eulim_A.jpg",
+        5: "map/2_study201.jpg",
+        6: "map/2_study202.jpg",
         7: "map/3_hae_A.jpg",
         8: "map/3_hae_B.jpg",
         9: "map/2_chang_B.jpg",
@@ -144,9 +144,6 @@ const MainSection: React.FC = () => {
                             roomId={selectedRoomId}
                             onReserve={async (seatId: number) => {
                                 try {
-                                    const result = await axiosInstance.post('/reservation', {
-                                        seatId : seatId, roomId:selectedRoomId
-                                    });
 
                                     alert(`좌석 ${seatId} 예약완료`);
                                 }

@@ -79,6 +79,7 @@ const RoomAsideList = () => {
     console.log("=== 필터링 ===");
     console.log("전체 rooms:", rooms);
     console.log("selectedCategory:", selectedCategory);
+    
 
     if (!selectedCategory) return rooms;
 
@@ -102,6 +103,7 @@ const RoomAsideList = () => {
     setRoomName(roomName);
     setMode("room");
     openRoom(roomId);
+    
   };
 
   // if (mode !== "floor") return null;
@@ -132,7 +134,10 @@ const RoomAsideList = () => {
         {selectedCategory === "자료관" && (
           filteredRooms.length > 0 ? (
             <ul className="divide-y divide-gray-500">
-              {filteredRooms.map((room) => (
+              {filteredRooms.map((room) => {
+                console.log("룸룸" , room);
+                return(
+                
                 <li key={room.id} className="text-white flex items-center justify-between pt-3 pb-3 gap-4">
                   <div
                     onClick={() => handleClickRoom(room.id, room.name)}
@@ -144,11 +149,15 @@ const RoomAsideList = () => {
                         width: `${(room.availableSeats / room.totalSeats) * 100}%`,
                       }}>
                       {room.availableSeats}/{room.totalSeats}
+                      
+                      
                     </div>
 
                   </div>
                 </li>
-              ))}
+                )
+              }
+              )}
             </ul>
           ) : (
             <p>자료관에 방이 없습니다.</p>

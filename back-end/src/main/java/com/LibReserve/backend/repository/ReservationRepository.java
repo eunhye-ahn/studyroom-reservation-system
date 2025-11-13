@@ -1,6 +1,7 @@
 package com.LibReserve.backend.repository;
 
 import com.LibReserve.backend.domain.Reservation;
+import com.LibReserve.backend.domain.ReservationStatus;
 import com.LibReserve.backend.domain.Seat;
 import com.LibReserve.backend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +28,12 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
             @Param("startTime") LocalTime startTime,
             @Param("endTime") LocalTime endTime
     );
+
+    //좌석 겹침검사 ver2
+//    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END " +
+//            "FROM Reservation r " +
+//            "WHERE r.seat.id = :seatId")
+//    boolean existsActiveBySeatId(@Param("seatId") Long seatId);
 
     // 같은날짜에, 해당 사용자의 시간대가 겹치면 true
     @Query("""

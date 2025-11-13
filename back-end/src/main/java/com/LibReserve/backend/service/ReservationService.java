@@ -61,6 +61,12 @@ public class ReservationService {
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
                 seat, date, startTime,endTime
         );
+//        boolean exists = reservationRepository.existsBySeatIdAndStatus(
+//                seat.getId(),
+//                true
+//        );
+//        boolean exists = reservationRepository.existsActiveBySeatId(seat.getId());
+
         if(exists){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 예약된 좌석입니다.");
         }
