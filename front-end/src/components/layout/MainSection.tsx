@@ -14,13 +14,16 @@ import { Seat } from "../../stores/useSeatStore";
 const MainSection: React.FC = () => {
 
 
-    const { roomName, selectedFloor, selectedRoomId: selectedRoomId, openRoom: openArea, mode, setSeatsInRoom: setSeatsInRoom } = useRoomStore();
+    const { roomName, selectedFloor,setSelectedFloor,setSelectedCategory, selectedRoomId: selectedRoomId, openRoom: openArea, mode, setSeatsInRoom: setSeatsInRoom } = useRoomStore();
     const [roomImage, setRoomImage] = useState<string>("");
     const [seats, setSeats] = useState<Seat[]>([]);
 
 
 
-
+    useEffect(()=>{
+        setSelectedFloor(1);
+        setSelectedCategory("자료관");
+},[]);
 
     useEffect(() => {
         let alive = true;
