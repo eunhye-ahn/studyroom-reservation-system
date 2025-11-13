@@ -51,10 +51,12 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
       const statusList: SeatStatus[] = statusRes.data;
 
 const combined: Seat[] = seatList.map((seat: any) => {
-  const status = statusList.find((s: any) => s.seatId === seat.id);
+  //db에서 상태가져오기
+  const status = statusList.find(s => s.seatId === seat.id);
   return {
     id: seat.id,
     number: seat.number,
+    roomId: numericRoomId,
     readingRoomName: seat.readingRoomName,
     available: status ? status.available : true,
   };
@@ -113,30 +115,37 @@ const updatedSeats = prevSeats.map((seat: Seat) => {
   }, [numericRoomId, userId]); //roomId, userId 변경시 재연결
 
   const handleSeatClick = async (button: any) => {
-  const seat = seats.find(s => s.number === button.seatId);
+
+    //zustand store에서 관리하는 seats배열에서의 number와 버튼의 라벨이 같다면?
+  const seat = seats.find(s => s.roomId === numericRoomId && s.number === Number(button.label));
+
+
   
   console.log('🖱️ 좌석 클릭:', button.seatId);
 
   if (!seat) {
-    console.error('❌ 좌석을 찾을 수 없음:', button.seatId);
+    console.error('❌ 좌석을 찾을 수 없음:', button.label);
     return;
   }
 
   if (seat.available) {
-    console.log('▶️ 좌석 사용 시작:', seat.id, seat.number);
-    
+    console.log('▶️ 좌석 예약 시도:', seat.id, seat.number);
     try {
+
+      
       // 1️⃣ REST API로 예약 (백엔드 DB 업데이트)
-      await axiosInstance.post(`/seats/${seat.id}/reserve`, { 
-        userId 
-      });
+      const response = await axiosInstance.post('/reservation',{ seatId: seat.id, readingRoomId: numericRoomId});
+      
+      console.log('✅ 예약 성공:', response.data);
+      onReserve?.(seat.id); 
+      // << 이친구의 역할을 잘 모르겠어 웹소켓에 관여하지도않음
       
       // 2️⃣ WebSocket으로 상태 변경 브로드캐스트
       // webSocketService.startUsingSeat(seat.id, seat.number, userId);
-      
-      console.log('✅ 예약 성공 + WebSocket 전송');
+
     } catch (error) {
       console.error('❌ 예약 실패:', error);
+      alert("예약실패")
     }
   } else {
     console.log('⏹️ 좌석 반납:', seat.id, seat.number);
@@ -153,48 +162,49 @@ const updatedSeats = prevSeats.map((seat: Seat) => {
       console.log('✅ 반납 성공 + WebSocket 전송');
     } catch (error) {
       console.error('❌ 반납 실패:', error);
+      alert("반납실패");
     }
   }
 };
 
-return (
-  <g>
-    {seatsButtons.map((button) => {
-      // API 데이터에서 해당 좌석의 실시간 상태 찾기
-      const seatStatus = seats.find(seat => seat.number === button.seatId);
-      const isAvailable = seatStatus?.available ?? true;
-      
-      return (
-        <g
-          key={button.seatId}
-          onClick={(e) => {
-            e.stopPropagation();
-            if (isAvailable) onReserve?.(button.seatId); // 사용가능할 때만 예약
-          }}
-          style={{ 
-            cursor: isAvailable ? "pointer" : "not-allowed", 
-          }}
-          aria-label={`Seat ${button.label ?? button.seatId}`}
-          role="button"
-        >
-          <rect 
-            x={button.x} 
-            y={button.y} 
-            width={button.w} 
-            height={button.h} 
-            rx={2} 
-            fill={isAvailable ? "rgba(70,193,29)" : "rgba(205,0,0)"} // 상태에 따른 색상
-          />
-          {button.label && (
-            <text x={button.x + button.w / 2} y={button.y + button.h / 2 + 3} 
-                  fill="white" fontSize={10} textAnchor="middle">
-              {button.label}
-            </text>
-          )}
-        </g>
-      );
-    })}
-  </g>
-);};
-
-export default SeatButtons;
+  return (
+    <g>
+      {seatsButtons.map((button) => {
+        const seat = seats.find(s => 
+          s.roomId === numericRoomId && s.number === Number(button.label)
+        );
+        const isAvailable = seat?.available ?? true;
+        
+        return (
+          <g
+            key={button.label}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSeatClick(button); // 🔥 수정
+            }}
+            style={{ 
+              cursor: isAvailable ? "pointer" : "not-allowed", 
+            }}
+            aria-label={`Seat ${button.label}`}
+            role="button"
+          >
+            <rect 
+              x={button.x} 
+              y={button.y} 
+              width={button.w} 
+              height={button.h} 
+              rx={2} 
+              fill={isAvailable ? "rgba(70,193,29)" : "rgba(205,0,0)"}
+            />
+            {button.label && (
+              <text x={button.x + button.w / 2} y={button.y + button.h / 2 + 3} 
+                    fill="white" fontSize={10} textAnchor="middle">
+                {button.label}
+              </text>
+            )}
+          </g>
+        );
+      })}
+    </g>
+  );
+};export default SeatButtons;

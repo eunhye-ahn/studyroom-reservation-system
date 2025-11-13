@@ -145,7 +145,7 @@ const MainSection: React.FC = () => {
                             onReserve={async (seatId: number) => {
                                 try {
                                     const result = await axiosInstance.post('/reservation', {
-                                        seatId : seatId,
+                                        seatId : seatId, roomId:selectedRoomId
                                     });
 
                                     alert(`좌석 ${seatId} 예약완료`);

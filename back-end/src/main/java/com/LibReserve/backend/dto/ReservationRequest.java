@@ -10,9 +10,6 @@ import java.time.LocalTime;
 @Getter
 @Setter
 public class ReservationRequest {
-    private ReadingRoom roomId;
+    private Long roomId;
     private Long seatId;
-
-
-
 }

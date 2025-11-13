@@ -38,7 +38,6 @@ public class ReservationController {
         reservationService.createReservation(email, request);
 
 
-
         return ResponseEntity.ok("예약 생성 완료 : "+ request);
     }
 
