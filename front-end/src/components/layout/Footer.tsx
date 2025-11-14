@@ -1,4 +1,4 @@
-import useRoomStore from "../../stores/useRoomStore";
+import useRoomStore from "../../hooks/useRoomStore";
 import React, { useEffect, useState } from "react";
 // import {FloorId} from "../../api/type"
 

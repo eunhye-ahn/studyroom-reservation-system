@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../../stores/useUserStore";
+import useUserStore from "../../hooks/useUserStore";
 import RoomAsideList from "../aside/RoomAsideList";
 
 const AsideSection = () => {

@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,6 +16,7 @@ public class SeatStatusMessage {
     private Long userId;
     private LocalDateTime timestamp;
     private MessageType type;
+    private String message;
 
     public enum SeatStatus {
         AVAILABLE,      // 이용 가능
@@ -29,6 +31,12 @@ public class SeatStatusMessage {
         INITIAL_LOAD    // 초기 로드
     }
 
+    public SeatStatusMessage(Long seatId, SeatStatus status, String message){
+        this.seatId = seatId;
+        this.status = status;
+        this.message = message;
+    }
+
     public SeatStatusMessage withTimestamp() {
         return new SeatStatusMessage(
                 this.seatId,
@@ -36,7 +44,8 @@ public class SeatStatusMessage {
                 this.status,
                 this.userId,
                 LocalDateTime.now(),
-                this.type
+                this.type,
+                this.message
         );
 
     }

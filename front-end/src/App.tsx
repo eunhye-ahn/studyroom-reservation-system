@@ -8,6 +8,7 @@ import RoomList from './pages/RoomList';
 import RoomDetail from './pages/RoomDetail';
 import MyReservation from './pages/MyReservation';
 import './index.css' 
+import AdminPage from './pages/AdminPage';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/roomList" element={<RoomList/>}/>
           <Route path="myReservation" element={<MyReservation/>}/>
           <Route path="/rooms/:roomId" element={<RoomDetail/>}/>
+          <Route path="/admin" element={<AdminPage/>}/>
 
         </Routes>
       </BrowserRouter>

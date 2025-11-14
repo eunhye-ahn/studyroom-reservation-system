@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import type { RoomId } from "../api/type"
 import { SEAT_BUTTON_BY_AREA } from "../constans/seats";
-import useRoomStore from "../stores/useRoomStore";
+import useRoomStore from "../hooks/useRoomStore";
 import axiosInstance from "../api/axiosInstance";
-import useSeatStore,{Seat} from "../stores/useSeatStore";
-import useUserStore from "src/stores/useUserStore";
+import useSeatStore,{Seat} from "../hooks/useSeatStore";
+import useUserStore from "src/hooks/useUserStore";
 import { useSeatWebSocket } from "../hooks/useSeatWebSocket";
 import {useParams} from "react-router-dom";
 

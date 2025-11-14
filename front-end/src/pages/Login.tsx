@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../hooks/useUserStore";
 import SignUp from './SignUp';
 import axiosInstance from '../api/axiosInstance';
 import { login, fetchMe } from '../api/auth';

@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react';
-import webSocketService, { SeatStatusMessage } from '../services/WebSocketService';
+import webSocketService, { SeatStatusMessage, AdminNotification } from '../services/WebSocketService';
+import useRoomStore from './useRoomStore';
 
-export const useSeatWebSocket = (userId: number) => {
+
+export const useSeatWebSocket = (userId: number, seatId?:number) => {
   const [connected, setConnected] = useState(false);
   const [seats, setSeats] = useState<SeatStatusMessage[]>([]);
+  const {
+    selectedRoomId
+  } = useRoomStore();
+  const [forceReturnNotification, setForceReturnNotification] = useState<AdminNotification | null>(null);
+
 
   useEffect(() => {
     // WebSocket 연결
-    webSocketService.connect(userId);
+    webSocketService.connect(userId, selectedRoomId);
     setConnected(true);
 
     // 좌석 상태 업데이트 구독
@@ -29,6 +36,19 @@ export const useSeatWebSocket = (userId: number) => {
         }
       });
     });
+
+    let unsubscribeForceReturn: (() => void) | undefined;
+    
+    if (seatId) {
+      unsubscribeForceReturn = webSocketService.subscribeToSeatNotification(
+        seatId,
+        (notification) => {
+          console.log('내 좌석 강제 반납됨:', notification);
+          setForceReturnNotification(notification);
+        }
+      );
+    }
+
 
     // Cleanup
     return () => {

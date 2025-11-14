@@ -41,4 +41,13 @@ public class SeatService {
         return batch.size();
     }
 
+    public Seat getSeatById(Long id){
+        return seatRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("좌석" + id + "번을 찾을 수 없습니다"));
+    }
+
+    public Seat saveSeat(Seat seat) {
+        return seatRepository.save(seat);
+    }
+
 }

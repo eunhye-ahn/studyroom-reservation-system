@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useEffect, useState } from "react";
-import useRoomStore from "../stores/useRoomStore";
+import useRoomStore from "../hooks/useRoomStore";
 
 interface RoomInfo {
     id: number

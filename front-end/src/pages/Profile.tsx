@@ -1,4 +1,4 @@
-import useUserStore from "../stores/useUserStore";
+import useUserStore from "../hooks/useUserStore";
 
 function Profile() {
   const user = useUserStore((state) => state.user);
