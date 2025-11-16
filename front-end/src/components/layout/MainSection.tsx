@@ -146,24 +146,24 @@ const MainSection: React.FC = () => {
                         <SeatButton
                             roomId={selectedRoomId}
                             onReserve={async (seatId: number) => {
-                                try {
+                                // try {
 
                                     alert(`좌석 ${seatId} 예약완료`);
-                                }
-                                catch (error: any) {
-                                    console.error("예약실패 : ", error);
-                                    console.error("예약 실패 상세:", error.response?.status);
-                                    let msg = "예약 실패";
-                                    if (error.response?.data) {
-                                        if (typeof error.response.data === "string") {
-                                            msg = error.response.data;
-                                        } else if (typeof error.response.data.message === "string") {
-                                            msg = error.response.data.message;
-                                        }
-                                    }
-                                    alert(msg);
+                                // }
+                                // catch (error: any) {
+                                //     console.error("예약실패 : ", error);
+                                //     console.error("예약 실패 상세:", error.response?.status);
+                                //     let msg = "예약 실패";
+                                //     if (error.response?.data) {
+                                //         if (typeof error.response.data === "string") {
+                                //             msg = error.response.data;
+                                //         } else if (typeof error.response.data.message === "string") {
+                                //             msg = error.response.data.message;
+                                //         }
+                                //     }
+                                //     alert(msg);
 
-                                }
+                                // }
                             }}
                         />
                     )}
