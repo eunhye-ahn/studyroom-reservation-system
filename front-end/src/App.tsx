@@ -1,18 +1,19 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import Home from './pages/Home';
+import Login from './pages/auth/Login';
+import SignUp from './pages/auth/SignUp';
+import Home from './pages/home/Home';
 import Profile from './pages/Profile';
 import RoomList from './pages/RoomList';
-import RoomDetail from './pages/RoomDetail';
+// import RoomDetail from './pages/RoomDetail';
 import MyReservation from './pages/MyReservation';
+import AdminPage from './pages/auth/AdminPage';
 import './index.css' 
+import NotificationModal from './components/NotificationModal';
 
 function App() {
 
   return (
-
       <BrowserRouter>
         <Routes>
         <Route path="/" element={<Login />} />
@@ -22,9 +23,12 @@ function App() {
           <Route path="/profile" element={<Profile/>}/>
           <Route path="/roomList" element={<RoomList/>}/>
           <Route path="myReservation" element={<MyReservation/>}/>
-          <Route path="/rooms/:roomId" element={<RoomDetail/>}/>
+          <Route path="/admin" element={<AdminPage/>}/>
+          {/* <Route path="/rooms/:roomId" element={<RoomDetail/>}/> */}
 
         </Routes>
+        <NotificationModal />
+
       </BrowserRouter>
 
 

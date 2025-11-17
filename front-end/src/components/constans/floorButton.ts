@@ -1,4 +1,4 @@
-import {FloorButton, FloorId} from "../api/type";
+import {FloorButton, FloorId} from "../../types/type";
 
 export const FLOOR_BUTTONS: Record<FloorId, FloorButton[]> = {
     1: [

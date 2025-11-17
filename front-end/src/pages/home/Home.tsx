@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import AsideSection from "../components/aside/AsideSection";
-import Footer from "../components/layout/Footer";
-import MainSection from "../components/layout/MainSection";
-import DateTimeDisplay from "../components/layout/DateTimeDisplay";
+import AsideSection from "./AsideSection";
+import Footer from "../../layout/Footer";
+import MainSection from "../../layout/MainSection";
+import DateTimeDisplay from "../../layout/DateTimeDisplay";
 
 function Home() {
     const navigate = useNavigate();

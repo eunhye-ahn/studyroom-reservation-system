@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import webSocketService, { SeatStatusMessage, AdminNotification } from '../services/WebSocketService';
-import useRoomStore from './useRoomStore';
+import useRoomStore from '../store/useRoomStore';
 
 
 export const useSeatWebSocket = (userId: number, seatId?:number) => {

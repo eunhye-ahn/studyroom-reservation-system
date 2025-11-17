@@ -1,13 +1,13 @@
 import React from "react";
 import { useEffect, useState, useMemo } from "react";
-import useRoomStore from "../../hooks/useRoomStore";
-import { FloorId, RoomId } from "../../api/type"
-import FloorButton from "../FloorButton";
-import SeatButton from "../SeatButton";
+import useRoomStore from "../store/useRoomStore";
+import { FloorId, RoomId } from "../types/type"
+import FloorButton from "../components/FloorButton";
+import SeatButton from "../components/SeatButton";
 import api from "axios";
-import { RoomInfo } from "../../api/rooms";
-import axiosInstance from "../../api/axiosInstance";
-import { Seat } from "../../hooks/useSeatStore";
+import { RoomInfo } from "../api/rooms";
+import axiosInstance from "../api/axiosInstance";
+import { Seat } from "../store/useSeatStore";
 
 
 

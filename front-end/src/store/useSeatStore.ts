@@ -14,11 +14,13 @@ export interface SeatStore {
   seats: Seat[];
   selectedSeat: Seat | null;
   loading: boolean;
+
   
   setSeats: (seats: Seat[] | ((prev: Seat[]) => Seat[])) => void; 
   setSelectedSeat: (seat: Seat | null) => void;
   setLoading: (loading: boolean) => void;
   clearSeats: () => void;
+
 }
 
 

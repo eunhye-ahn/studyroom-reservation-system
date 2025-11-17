@@ -1,4 +1,4 @@
-import useRoomStore from "../../hooks/useRoomStore";
+import useRoomStore from "../../store/useRoomStore";
 import { useEffect, useMemo, useState } from "react";
 import { fetchRooms, RoomInfo, LABEL_TO_CODE } from "../../api/rooms";
 import { useNavigate } from "react-router-dom";

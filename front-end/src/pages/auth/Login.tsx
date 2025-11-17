@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import useUserStore from "../hooks/useUserStore";
+import useUserStore from "../../store/useUserStore";
 import SignUp from './SignUp';
-import axiosInstance from '../api/axiosInstance';
-import { login, fetchMe } from '../api/auth';
-import { MyReserve } from '../api/type';
+import axiosInstance from '../../api/axiosInstance';
+import { login, fetchMe } from '../../api/auth';
+import { MyReserve } from '../../types/type';
 import dayjs from 'dayjs';
-import { ActiveReservationModal } from '../components/ActiveReservationModal';
+import { ActiveReservationModal } from '../../components/ActiveReservationModal';
 
 const Login = () => {
 

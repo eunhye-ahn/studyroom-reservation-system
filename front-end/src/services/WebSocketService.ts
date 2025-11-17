@@ -24,7 +24,7 @@ export interface SeatStatusMessage{
 }
 
 export interface AdminNotification{
-  type: 'ANNUOUNCEMENT' | 'FORCE_RETURNED';
+  type: 'ANNOUNCEMENT' | 'FORCE_RETURNED';
   message: string;
   seatId: number | null;
 }

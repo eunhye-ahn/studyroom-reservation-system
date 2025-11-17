@@ -1,4 +1,5 @@
-import { RoomId, SeatButton } from "../api/type";
+import { RoomId} from "../../types/type";
+import { SeatButton } from "../../types/seat.types"
 
 
 export const SEAT_BUTTON_BY_AREA: Record<RoomId, SeatButton[]> = {

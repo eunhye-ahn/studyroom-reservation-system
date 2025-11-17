@@ -1,4 +1,4 @@
-import useNotification from "../store/notificationStore";
+import useNotification from "../store/useNotificationStore";
 
 const NotificationModal = () => {
   //store에서 필요한 데이터와 함수들 꺼내오기

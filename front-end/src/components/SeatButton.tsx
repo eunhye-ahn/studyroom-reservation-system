@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import type { RoomId } from "../api/type"
-import { SEAT_BUTTON_BY_AREA } from "../constans/seats";
-import useRoomStore from "../hooks/useRoomStore";
+import type { RoomId } from "../types/type"
+import { SEAT_BUTTON_BY_AREA } from "./constans/seats";
+import useRoomStore from "../store/useRoomStore";
 import axiosInstance from "../api/axiosInstance";
-import useSeatStore,{Seat} from "../hooks/useSeatStore";
-import useUserStore from "src/hooks/useUserStore";
+import useSeatStore,{Seat} from "../store/useSeatStore";
+import useUserStore from "../store/useUserStore";
 import { useSeatWebSocket } from "../hooks/useSeatWebSocket";
 import {useParams} from "react-router-dom";
 
@@ -12,6 +12,7 @@ import webSocketService, {
   SeatStatusMessage, 
   SeatStatus as WSSeatStatus 
 } from "../services/WebSocketService";
+import useNotification from "../hooks/useNotification";
 
 interface SeatButtonsProps {
   roomId: RoomId;
@@ -30,11 +31,12 @@ interface SeatStatus {
 }
 
 const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
-  const {seats, setSeats, setLoading} = useSeatStore();
+  const {seats, setSeats, setLoading, selectedSeat} = useSeatStore(); 
 
   const userId = 1;
   const numericRoomId = Number(roomId);
 
+  useNotification(selectedSeat?.id || null);
   const seatsButtons = SEAT_BUTTON_BY_AREA[numericRoomId as RoomId] ?? [];
   if (!seatsButtons.length) return null;
 

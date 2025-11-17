@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { RoomInfo } from "../api/rooms";
-import type { FloorId, RoomId} from "../api/type";
+import type { FloorId, RoomId} from "../types/type";
 import { LABEL_TO_CODE } from "../api/rooms";
 
 export type Mode = 'floor' | 'room'

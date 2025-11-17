@@ -1,7 +1,8 @@
-// pages/AdminPage.tsx (새 파일)
+
 import React, { useState, useEffect } from 'react';
-import { useAdminWebSocket } from '../hooks/useAdminWebsocket';
-import { useSeatWebSocket } from '../hooks/useSeatWebSocket';
+import { useAdminWebSocket } from '../../hooks/useAdminWebsocket';
+import { useSeatWebSocket } from '../../hooks/useSeatWebSocket';
+import useNotification from '../../store/useNotificationStore';
 
 const AdminPage: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -10,6 +11,8 @@ const AdminPage: React.FC = () => {
   
   const { forceReturnSeat, sendAnnouncement } = useAdminWebSocket();
   const { seats, connected } = useSeatWebSocket(0); // userId 0 (관리자)
+
+  useNotification();
   
   // 간단한 인증
   const handleLogin = () => {

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import useNotificationStore from "../store/notificationStore";
+import useNotificationStore from "../store/useNotificationStore";
 import webSocketService, { AdminNotification } from "../services/WebSocketService";
 
-export const useNotification = (seatId : number | null) => {
+const useNotification = (seatId : number | null) => {
   const { showNotification} = useNotificationStore();
   useEffect(()=> {
     console.log('🔔 useNotification 훅 실행, seatId:', seatId);
@@ -40,3 +40,5 @@ export const useNotification = (seatId : number | null) => {
   }
   ,[seatId, showNotification]);
 }
+
+export default useNotification;

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useEffect, useState } from "react";
-import useRoomStore from "../hooks/useRoomStore";
+import useRoomStore from "../store/useRoomStore";
 
 interface RoomInfo {
     id: number
@@ -18,12 +18,12 @@ interface RoomInfo {
 const RoomList = () => {
     const [rooms, setRoom] = useState<RoomInfo[]>([]);
     const navigate = useNavigate();
-    const { setRooms } = useRoomStore();
+    const { setCurrentRoom } = useRoomStore();
 
     useEffect(() => {
         axiosInstance.get("/rooms")
             .then((res) => {
-                setRooms(res.data);
+                setCurrentRoom(res.data);
                 setRoom(res.data);
             })
             .catch((err) => {

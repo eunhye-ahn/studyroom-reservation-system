@@ -1,5 +1,5 @@
-import { FLOOR_BUTTONS } from "../constans/floorButton";
-import { FloorId } from "../api/type";
+import { FLOOR_BUTTONS } from "./constans/floorButton";
+import { FloorId } from "../types/type";
 
 export type FloorButtonProps = {
     floor: FloorId | null;

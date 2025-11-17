@@ -1,6 +1,5 @@
-import useRoomStore from "../../hooks/useRoomStore";
+import useRoomStore from "../store/useRoomStore";
 import React, { useEffect, useState } from "react";
-// import {FloorId} from "../../api/type"
 
 
 const Footer: React.FC=()=>{
