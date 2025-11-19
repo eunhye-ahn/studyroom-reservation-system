@@ -11,7 +11,10 @@ export interface Seat {
 }
 
 export interface SeatStore {
+  //배열 : 모든 좌석 관리
   seats: Seat[];
+
+  //객체 : 특정 좌석 추적
   selectedSeat: Seat | null;
   loading: boolean;
 

@@ -1,12 +1,18 @@
 package com.LibReserve.backend.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@Getter
+@Setter
 @Entity
+@RequiredArgsConstructor
 @Table(name = "reservations")
 public class Reservation {
     @Id
@@ -34,17 +40,10 @@ public class Reservation {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 20)
+    private ReservationStatus status = ReservationStatus.ACTIVE;
 
-    public int getExtensionCount() {
-        return extensionCount;
-    }
-
-    public void setExtensionCount(int extensionCount) {
-        this.extensionCount = extensionCount;
-    }
 
     public LocalDateTime getEndDateTime() {
         if (endDate == null) {
@@ -53,10 +52,8 @@ public class Reservation {
         return LocalDateTime.of(this.endDate, this.endTime);
     }
 
-    public Reservation() {
-    }
 
-    public Reservation(User user, LocalDate date, LocalTime startTime,LocalDate endDate, LocalTime endTime, Seat seat, int extensionCount) {
+    public Reservation(User user, LocalDate date, LocalTime startTime,LocalDate endDate, LocalTime endTime, Seat seat, int extensionCount, ReservationStatus status) {
         this.user = user;
         this.date = date;
         this.startTime = startTime;
@@ -64,55 +61,6 @@ public class Reservation {
         this.endTime = endTime;
         this.seat = seat;
         this.extensionCount = extensionCount;
-    }
-
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Seat getSeat() {
-        return seat;
-    }
-
-    public void setSeat(Seat seat) {
-        this.seat = seat;
+        this.status = status;
     }
 }

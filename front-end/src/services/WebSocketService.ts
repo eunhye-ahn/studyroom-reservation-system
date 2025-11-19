@@ -57,7 +57,7 @@ class WebSocketService {
             console.log(str);
         },
 
-      reconnectDelay: 5000,
+      reconnectDelay: 0,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       });
@@ -70,8 +70,8 @@ class WebSocketService {
     }
 
     //연결시작
-    public connect(userId: number, roomId:number): void {
-    if (!this.client) return;
+    public connect(userId: number | null, roomId:number): void {
+    if (!this.client || userId === null) return;
 
     this.currentRoomId = roomId;
     this.client.activate();

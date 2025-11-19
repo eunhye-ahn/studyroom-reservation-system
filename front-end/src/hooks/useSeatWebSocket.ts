@@ -54,9 +54,9 @@ export const useSeatWebSocket = (userId: number, seatId?:number) => {
     return () => {
       unsubscribe();
       webSocketService.disconnect();
-      setConnected(false);
+      // setConnected(false);
     };
-  }, [userId]);
+  }, [userId, selectedRoomId]);
 
   return { connected, seats };
 };

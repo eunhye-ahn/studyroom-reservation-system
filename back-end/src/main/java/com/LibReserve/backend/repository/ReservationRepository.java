@@ -64,8 +64,7 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
     );
 
     //종료된 예약 찾기
-    @Query("SELECT r FROM Reservation r WHERE " +
-            "r.seat.available = false "+
+    @Query("SELECT r FROM Reservation r WHERE r.status = 'ACTIVE'" +
             "AND FUNCTION('TIMESTAMP', r.date, r.endTime) <= :now")
     List<Reservation> findExpiredReservations(@Param("now") LocalDateTime now);
 }

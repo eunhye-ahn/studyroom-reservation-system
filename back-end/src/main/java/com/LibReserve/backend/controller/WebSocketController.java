@@ -8,6 +8,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDateTime;
+
 @Controller
 @RequiredArgsConstructor
 public class WebSocketController {
@@ -17,9 +19,6 @@ public class WebSocketController {
     @MessageMapping("/seat.updateStatus")
     @SendTo("/topic/seats")
     public SeatStatusMessage updateStatus(@Payload SeatStatusMessage message) {
-        System.out.println("Processing seat " + message.getNumber() +
-                " status change to " + message.getStatus());
-
         return message.withTimestamp();
     }
 }

@@ -1,6 +1,7 @@
 package com.LibReserve.backend.service;
 
 import com.LibReserve.backend.domain.Reservation;
+import com.LibReserve.backend.domain.ReservationStatus;
 import com.LibReserve.backend.domain.Seat;
 import com.LibReserve.backend.repository.ReservationRepository;
 import com.LibReserve.backend.repository.SeatRepository;
@@ -21,7 +22,7 @@ public class SeatStatusScheduler {
 
 
 
-    @Scheduled(fixedRate = 60*1000)
+//    @Scheduled(fixedRate = 60*1000)
     public void updateSeatAvailablity() {
 
         LocalDateTime now = LocalDateTime.now();
@@ -29,6 +30,7 @@ public class SeatStatusScheduler {
 
         List<Reservation> expired = reservationRepository.findExpiredReservations(now);
         System.out.println("⏰ 만료된 예약 수: " + expired.size());
+        //여기 나중에 수정 필요
 
         for (Reservation r : expired) {
             System.out.println("➡️ 반납 처리: 예약 ID = " + r.getId() +
@@ -38,10 +40,8 @@ public class SeatStatusScheduler {
             List<Reservation> expiredReservation =
                     reservationRepository.findExpiredReservations(now);
 
-            for (Reservation reservation : expiredReservation) {
-                Seat seat = reservation.getSeat();
+                Seat seat = r.getSeat();
                 seat.setAvailable(true);
                 seatRepository.save(seat);
-            }
         }
     }}

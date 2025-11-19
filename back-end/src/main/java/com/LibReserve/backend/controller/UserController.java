@@ -81,6 +81,7 @@ public class UserController {
         response.put("email", user.getEmail());
         response.put("name", user.getName());
         response.put("role", user.getRole());
+        response.put("id", user.getId());
         return ResponseEntity.ok(response);
     }
 }

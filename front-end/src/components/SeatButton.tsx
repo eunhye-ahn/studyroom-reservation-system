@@ -32,11 +32,12 @@ interface SeatStatus {
 
 const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
   const {seats, setSeats, setLoading, selectedSeat} = useSeatStore(); 
+  const {user} = useUserStore();
 
-  const userId = 1;
+  const userId = user?.id || null;
   const numericRoomId = Number(roomId);
 
-  useNotification(selectedSeat?.id || null);
+  // useNotification(selectedSeat?.id || null);
   const seatsButtons = SEAT_BUTTON_BY_AREA[numericRoomId as RoomId] ?? [];
   if (!seatsButtons.length) return null;
 
@@ -79,13 +80,10 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
 
     // 좌석 상태 변경 구독
     const unsubscribe = webSocketService.subscribeToMessages((message: SeatStatusMessage) => {
-      console.log('📨 WebSocket 메시지 수신:', message);
-
       // 좌석 상태 업데이트
       setSeats((prevSeats: Seat[]) => {
         const updatedSeats = prevSeats.map((seat: Seat) => {
           if (seat.id === message.seatId) {
-            console.log(`🔄 좌석 ${seat.number} 상태 변경: ${seat.available} → ${message.status === WSSeatStatus.AVAILABLE}`);
             return {
               ...seat,
               available: message.status === WSSeatStatus.AVAILABLE
@@ -99,11 +97,11 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
 
     // Cleanup : 컴포넌트 언마운트 시 연결해제
     return () => {
-      console.log('🔌 WebSocket 연결 해제');
-      unsubscribe();
-      webSocketService.disconnect();
+        console.log('🔌 WebSocket cleanup 실행');
+        unsubscribe();
+        webSocketService.disconnect();
     };
-  }, [numericRoomId, userId]);
+  }, [numericRoomId, userId, setSeats]);
 
   const handleSeatClick = async (button: any) => {
     // zustand store에서 관리하는 seats배열에서의 number와 버튼의 라벨이 같다면?

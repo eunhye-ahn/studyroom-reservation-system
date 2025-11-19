@@ -75,10 +75,6 @@ const RoomAsideList = () => {
 
   // 서버가 카테고리 필터를 처리하지만, 방어적으로 한 번 더 필터링
   const filteredRooms = useMemo(() => {
-
-    console.log("=== 필터링 ===");
-    console.log("전체 rooms:", rooms);
-    console.log("selectedCategory:", selectedCategory);
     
 
     if (!selectedCategory) return rooms;
@@ -94,8 +90,6 @@ const RoomAsideList = () => {
 
     filtered = filtered.filter((r) => r.floor === selectedFloor);
 
-
-    console.log("층 필터링 후:", filtered);
     return filtered;
   }, [rooms, selectedCategory, selectedFloor]);
 
@@ -135,7 +129,6 @@ const RoomAsideList = () => {
           filteredRooms.length > 0 ? (
             <ul className="divide-y divide-gray-500">
               {filteredRooms.map((room) => {
-                console.log("룸룸" , room);
                 return(
                 
                 <li key={room.id} className="text-white flex items-center justify-between pt-3 pb-3 gap-4">

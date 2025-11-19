@@ -1,19 +1,20 @@
 package com.LibReserve.backend.service;
 
-import com.LibReserve.backend.domain.ReadingRoom;
-import com.LibReserve.backend.domain.Reservation;
-import com.LibReserve.backend.domain.Seat;
-import com.LibReserve.backend.domain.User;
+import com.LibReserve.backend.domain.*;
 import com.LibReserve.backend.dto.*;
 import com.LibReserve.backend.repository.ReservationRepository;
 import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class ReservationService {
     private final ReadingRoomRepository readingRoomRepository;
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -46,7 +48,9 @@ public class ReservationService {
 //        this.seatRepository = seatRepository;
 //    }
 
+    @Transactional
     public void createReservation(String email, ReservationRequest request){
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN,"사용자 정보를 찾을 수 없습니다."));
         Seat seat = seatRepository.findById(request.getSeatId())
@@ -56,6 +60,7 @@ public class ReservationService {
         LocalTime startTime = LocalTime.now().withSecond(0).withNano(0);
         LocalTime endTime = startTime.plusHours(3);
         LocalDate endDate = endTime.isBefore(startTime) ? date.plusDays(1) : date;
+
 
         //좌석 겹침
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
@@ -80,16 +85,28 @@ public class ReservationService {
         }
 
         Reservation reservation = new Reservation(user,
-                date, startTime, endDate, endTime,seat,0);
+                date, startTime, endDate, endTime,seat,0, ReservationStatus.ACTIVE);
 
         seat.setAvailable(false);
+        seatRepository.save(seat);
         reservationRepository.save(reservation);
 
-        //웹소켓 브로드캐스트
+        applicationEventPublisher.publishEvent(
+                new ReservationCreatedEvent(seat, user.getId())
+        );
+
+    }
+
+    // 트랜잭션 커밋 후 WebSocket 전송
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void sendWebSocketAfterCommit(ReservationCreatedEvent event) {
+        Seat seat = event.getSeat();
+
         SeatStatusMessage message = SeatStatusMessage.builder()
                 .seatId(seat.getId())
                 .number(seat.getNumber())
                 .status(SeatStatusMessage.SeatStatus.OCCUPIED)
+                .userId(event.getUserId())
                 .type(SeatStatusMessage.MessageType.STATUS_CHANGE)
                 .build()
                 .withTimestamp();
@@ -98,7 +115,6 @@ public class ReservationService {
                 "/topic/rooms/" + seat.getReadingRoom().getId() + "/seats",
                 message
         );
-
 
     }
 
@@ -143,7 +159,7 @@ public class ReservationService {
         }
 
         Reservation reservation = new Reservation(user,
-                request.getDate(), request.getStartTime(),request.getEndDate(), request.getEndTime(),seat, 0);
+                request.getDate(), request.getStartTime(),request.getEndDate(), request.getEndTime(),seat, 0, ReservationStatus.ACTIVE);
         seat.setAvailable(false);
         reservationRepository.save(reservation);
 
@@ -223,7 +239,8 @@ public class ReservationService {
                 newEndDate,
                 newEnd,
                 reservation.getSeat(),
-                reservation.getExtensionCount()+1
+                reservation.getExtensionCount()+1,
+                reservation.getStatus()
                 );
         reservationRepository.save(newReservation);
 

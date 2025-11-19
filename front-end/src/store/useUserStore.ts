@@ -2,6 +2,7 @@ import {create} from "zustand";
 import { persist } from "zustand/middleware";
 
 interface UserInfo {
+    id:number,
     name: string;
     email: string;
     role: 'STUDENT' | 'GRADUATE' | 'LIBRAIAN' | 'PROFESSOR' | 'ADMIN';

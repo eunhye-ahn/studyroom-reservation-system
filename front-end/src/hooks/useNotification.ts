@@ -1,12 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useNotificationStore from "../store/useNotificationStore";
 import webSocketService, { AdminNotification } from "../services/WebSocketService";
 
 const useNotification = (seatId : number | null) => {
   const { showNotification} = useNotificationStore();
-  useEffect(()=> {
+  const isSubscribe = useRef(false);
+
+  useEffect(()=>{
+    if(isSubscribe.current){
+      console.log("이미 구독 중 스킵")
+      return;
+    }
+
     console.log('🔔 useNotification 훅 실행, seatId:', seatId);
     //websocket에서 메시지를 받으면
+    isSubscribe.current = true;
     const unsubscribeAnnouncement = webSocketService.subscribeToAnnouncement(
       (notification:AdminNotification) => {
         console.log('긴급 공지 수신:', notification);
@@ -32,13 +40,12 @@ const useNotification = (seatId : number | null) => {
     //클린업 : 컴포넌트가 언마운트될때, seatId가 null이 될때 - 메모리 누수 방지?, 불필요한 웹소켓 구독 정리
     return ()=> {
       console.log('알림 구독 해제');
+      isSubscribe.current = false;
       unsubscribeAnnouncement();
-      if(unsubscribeSeat){
-        unsubscribeSeat();
-      }
     };
   }
-  ,[seatId, showNotification]);
-}
+  ,[]);
+};
+    
 
 export default useNotification;

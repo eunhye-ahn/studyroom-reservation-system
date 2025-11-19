@@ -5,7 +5,7 @@ import useUserStore from "../../store/useUserStore";
 import SignUp from './SignUp';
 import axiosInstance from '../../api/axiosInstance';
 import { login, fetchMe } from '../../api/auth';
-import { MyReserve } from '../../types/type';
+import { MyReserve } from '../../types/reservation.types';
 import dayjs from 'dayjs';
 import { ActiveReservationModal } from '../../components/ActiveReservationModal';
 

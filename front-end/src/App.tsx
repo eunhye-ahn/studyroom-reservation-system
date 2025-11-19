@@ -9,10 +9,14 @@ import RoomList from './pages/RoomList';
 import MyReservation from './pages/MyReservation';
 import AdminPage from './pages/auth/AdminPage';
 import './index.css' 
+import useNotification from './hooks/useNotification';
+import useSeatStore from './store/useSeatStore';
 import NotificationModal from './components/NotificationModal';
 
 function App() {
 
+  const { selectedSeat } = useSeatStore();
+    useNotification(selectedSeat?.id ?? null);
   return (
       <BrowserRouter>
         <Routes>

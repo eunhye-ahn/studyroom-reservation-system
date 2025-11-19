@@ -145,10 +145,7 @@ const MainSection: React.FC = () => {
                     {mode === 'room' && selectedRoomId && (
                         <SeatButton
                             roomId={selectedRoomId}
-                            onReserve={async (seatId: number) => {
                                 // try {
-
-                                    alert(`좌석 ${seatId} 예약완료`);
                                 // }
                                 // catch (error: any) {
                                 //     console.error("예약실패 : ", error);
@@ -164,7 +161,7 @@ const MainSection: React.FC = () => {
                                 //     alert(msg);
 
                                 // }
-                            }}
+                            
                         />
                     )}
                 </svg>
