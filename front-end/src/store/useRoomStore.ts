@@ -18,6 +18,7 @@ interface RoomStore {
     currentRoom: RoomInfo | null;
     roomName: string | null;
     mode: Mode;
+    rooms: RoomInfo[];
 
     setRoomName: (name: string | null) => void;
     setSelectedFloor: (floor: number) => void;
@@ -28,6 +29,8 @@ interface RoomStore {
     backToFloor: () => void;
 
     //영역 방/좌석 관련
+    setRooms:(rooms:RoomInfo[])=> void;
+    updateRoomSeats:(roomId:number, availableSeats:number)=> void;
     setSeatsInRoom: (rooms: RoomInfo[]) => void;
     setCurrentRoom: (room: RoomInfo | null) => void;
      setFloorRooms: (rooms: RoomInfo[]) => void;
@@ -49,6 +52,7 @@ const useRoomStore = create<RoomStore>()(
             selectedRoomId: 1,
             seatsInRoom: [],
             floorRooms: [],
+            rooms: [],
 
             setRoomName: (name) => set({ roomName: name }),
             setSelectedFloor: (floor) => {
@@ -65,7 +69,16 @@ const useRoomStore = create<RoomStore>()(
             openRoom: (seatId) =>
                 set({ selectedRoomId: seatId, seatsInRoom: [], mode: "room" }),
             backToFloor: () => set({ selectedRoomId: 1, seatsInRoom: [], currentRoom: null, mode: "floor" }),
-
+    
+            setRooms:(rooms)=> set({rooms}),
+            updateRoomSeats:(roomId,availableSeats)=>
+                set((state)=>({
+                    rooms: state.rooms.map((room)=>
+                    room.id === roomId
+                    ?{...room, availableSeats} //이방만 업데이트
+                    : room
+                ),
+                })),
             setSeatsInRoom: (rooms) => set({ seatsInRoom: rooms }),
             setFloorRooms: (rooms) => set({ floorRooms: rooms }),
             setCurrentRoom: (room) => set({ currentRoom: room }),

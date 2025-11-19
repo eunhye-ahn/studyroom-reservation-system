@@ -15,21 +15,17 @@ const RoomAsideList = () => {
     setMode,
     openRoom,
     selectedRoomId,
+    rooms,
+    setRooms,
   } = useRoomStore();
 
   const navigate = useNavigate();
 
-  const [rooms, setRooms] = useState<RoomInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     if (mode !== "floor" || !selectedFloor) return;
-
-    console.log("=== API 호출 시작 ===");
-    console.log("selectedFloor:", selectedFloor);
-    console.log("selectedCategory:", selectedCategory);
-
 
     const controller = new AbortController(); // axios v1: AbortController 지원
     setLoading(true);
@@ -39,11 +35,6 @@ const RoomAsideList = () => {
       selectedCategory
         ? (LABEL_TO_CODE[selectedCategory] ?? selectedCategory)
         : undefined;
-
-
-    console.log("categoryParam:", categoryParam);
-    console.log("API params:", { floor: Number(selectedFloor), category: categoryParam });
-
     api
       .get<RoomInfo[]>("/rooms", {
         params: { floor: Number(selectedFloor), category: categoryParam },
@@ -69,7 +60,7 @@ const RoomAsideList = () => {
       });
 
     return () => controller.abort();
-  }, [mode, selectedFloor, selectedCategory]);
+  }, [mode, selectedFloor, selectedCategory, setRooms]);
 
 
 

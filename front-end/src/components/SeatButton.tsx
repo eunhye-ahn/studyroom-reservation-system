@@ -78,7 +78,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
     // WebSocket 연결
     webSocketService.connect(userId, numericRoomId);
 
-    // 좌석 상태 변경 구독
+    // 좌석 상태 변경 구독 : 메시지받으면 실행될 콜백함수 등록
     const unsubscribe = webSocketService.subscribeToMessages((message: SeatStatusMessage) => {
       // 좌석 상태 업데이트
       setSeats((prevSeats: Seat[]) => {
@@ -93,11 +93,26 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
         });
         return updatedSeats;
       });
-    });
+      
+      const currentRoom = useRoomStore.getState().rooms.find(
+        r => r.id === numericRoomId
+      );
+
+    if(currentRoom){
+      const seats = useSeatStore.getState().seats;
+      const availableCount = seats.filter(  // 오타 수정: avaialbaleCount → availableCount
+        s => s.available === true
+    ).length;
+
+    useRoomStore.getState().updateRoomSeats(
+      numericRoomId,  // selectedRoomId → numericRoomId
+      availableCount
+    );
+  }
+});
 
     // Cleanup : 컴포넌트 언마운트 시 연결해제
     return () => {
-        console.log('🔌 WebSocket cleanup 실행');
         unsubscribe();
         webSocketService.disconnect();
     };
@@ -175,7 +190,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
         }
       }
     }
-  }; // ✅ handleSeatClick 함수 종료
+  }; 
 
   return (
     <g>
