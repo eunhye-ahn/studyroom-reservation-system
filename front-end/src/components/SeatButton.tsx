@@ -76,7 +76,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
     console.log(`🔌 WebSocket 연결 시도: 열람실 ${numericRoomId}`);
     
     // WebSocket 연결
-    webSocketService.connect(userId, numericRoomId);
+    // webSocketService.connect(userId, numericRoomId);
 
     // 좌석 상태 변경 구독 : 메시지받으면 실행될 콜백함수 등록
     const unsubscribe = webSocketService.subscribeToMessages((message: SeatStatusMessage) => {
@@ -93,7 +93,8 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
         });
         return updatedSeats;
       });
-      
+
+      //rooms 업데이트 - aside 연동을 위해서
       const currentRoom = useRoomStore.getState().rooms.find(
         r => r.id === numericRoomId
       );
@@ -114,7 +115,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
     // Cleanup : 컴포넌트 언마운트 시 연결해제
     return () => {
         unsubscribe();
-        webSocketService.disconnect();
+        // webSocketService.disconnect();
     };
   }, [numericRoomId, userId, setSeats]);
 

@@ -1,11 +1,15 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import useUserStore from "../../store/useUserStore";
 import RoomAsideList from "./RoomAsideList";
+import webSocketService, { 
+  SeatStatusMessage, 
+  SeatStatus as WSSeatStatus 
+} from "../../services/WebSocketService";
+import { useEffect } from "react";
 
 const AsideSection = () => {
     const {user} = useUserStore();
     const navigate = useNavigate();
-
 
 
     return(

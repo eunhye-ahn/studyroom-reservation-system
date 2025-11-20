@@ -1,4 +1,4 @@
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage,StompSubscription  } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 export enum MessageType {
@@ -44,6 +44,8 @@ class WebSocketService {
     private currentRoomId: number | null = null;
     private announcementCallbacks: Set<(notification: AdminNotification) => void> = new Set();
     private forceReturnCallbacks: Set<(notification: AdminNotification) => void> = new Set();
+    private isActivated: boolean = false;
+private currentRoomSubscription: StompSubscription | null = null;
 
     //웹소켓 클라이언트 초기화
     constructor(){
@@ -70,33 +72,41 @@ class WebSocketService {
     }
 
     //연결시작
-    public connect(userId: number | null, roomId:number): void {
-    if (!this.client || userId === null) return;
+    public connect(userId: number | null, roomId:number | null): void {
+    // if (!this.client || userId === null || roomId === null) return;
 
-    this.currentRoomId = roomId;
-    this.client.activate();
-    localStorage.setItem('seat_userId', userId.toString());
-    localStorage.setItem('seat_roomId', roomId.toString()); //이거두개는 스토리지에 왜 저장함
+    //     this.currentRoomId = roomId;
+    //     this.client.activate();
+    //     localStorage.setItem('seat_userId', userId.toString());
+    //     localStorage.setItem('seat_roomId', roomId.toString()); //이거두개는 스토리지에 왜 저장함
+
+    console.log('[ws] 커넥트 호출');
+    console.log('[ws] userId:',userId, 'roomId:',roomId);
+
+    if(!this.client) {
+      console.error('[ws] 클라이언트 없음');
+      return;
     }
 
-      private onConnect(): void {
+    if(this.isActivated){
+      console.log('[ws] 이미 연결됨');
+
+      if(roomId !== null && roomId !== this.currentRoomId){
+        console.log('[ws] 룸아이디 변경');
+        this.joinRoom(roomId);
+      }
+      return;
+    }
+    this.currentRoomId = roomId;
+    console.log('[ws] acitvate 호출');
+    this.client.activate();
+    this.isActivated = true;
+    }
+
+    private onConnect(): void {
     console.log('Connected to WebSocket');
 
-
-    if(this.currentRoomId !== null){
-      const subscriptionPath = `/topic/rooms/${this.currentRoomId}/seats`;
-      //좌석 상태 구독
-      this.client?.subscribe(subscriptionPath, (message: IMessage) => {
-        try {
-          const seatMessage: SeatStatusMessage = JSON.parse(message.body);
-          //상태메시지를 받으면 콜백 실행
-          this.messageCallbacks.forEach(callback => callback(seatMessage));
-        } catch (e) {
-          console.error('Error parsing message', e);
-        }
-      });
-
-        //긴급 공지 구독
+            //긴급 공지 구독
       this.client?.subscribe('/topic/announcements',(message:IMessage)=>{
         try{
         const notification: AdminNotification = JSON.parse(message.body);
@@ -109,7 +119,15 @@ class WebSocketService {
         }
       });
       console.log('Subscribed complete');
+
+
+    if(this.currentRoomId !== null){
+      const subscriptionPath = `/topic/rooms/${this.currentRoomId}/seats`;
+      //좌석 상태 구독
+      this.subscribeToRoom(this.currentRoomId);
+
     }
+    console.log('ws구독완료');
   }
 
 
@@ -120,7 +138,15 @@ class WebSocketService {
     if (this.client && this.client.connected) {
       this.client.deactivate();
     }
+
+    if (this.currentRoomSubscription) {
+        this.currentRoomSubscription.unsubscribe();
+        this.currentRoomSubscription = null;
+        console.log('🪑 [WS] 방 구독 해제됨');
+      }
+
     this.currentRoomId = null; //초기화
+    this.isActivated = false;
   }
 
   // 메시지 수신 콜백 등록
@@ -260,6 +286,44 @@ class WebSocketService {
   // 연결 상태 확인
   public isConnected(): boolean {
     return this.client?.connected ?? false;
+  }
+
+  //방입장
+  public joinRoom(roomId:number):void{
+    console.log('방입장:',roomId);
+
+    if(!this.client || !this.client.connected){
+      console.error('ws연결안됨');
+      return;
+    }
+
+    if (roomId === this.currentRoomId){
+      return;
+    }
+
+    if (this.currentRoomSubscription) {
+      console.log('🔄 [WS] 이전 방 구독 해제:', this.currentRoomId);
+      this.currentRoomSubscription.unsubscribe();
+      this.currentRoomSubscription = null;
+  }
+
+  this.currentRoomId = roomId;
+    this.subscribeToRoom(roomId);
+}
+
+  public subscribeToRoom(roomId:number) : void{
+    console.log('방구독',roomId);
+    const subscriptionPath = `/topic/rooms/${roomId}/seats`;
+
+          this.client?.subscribe(subscriptionPath, (message: IMessage) => {
+        try {
+          const seatMessage: SeatStatusMessage = JSON.parse(message.body);
+          //상태메시지를 받으면 콜백 실행
+          this.messageCallbacks.forEach(callback => callback(seatMessage));
+        } catch (e) {
+          console.error('Error parsing message', e);
+        }
+      });
   }
 }
 

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminWebSocket } from '../../hooks/useAdminWebsocket';
 import { useSeatWebSocket } from '../../hooks/useSeatWebSocket';
-import useNotification from '../../store/useNotificationStore';
+import useGlobalNotification from '../../store/useNotificationStore';
 
 const AdminPage: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -12,7 +12,7 @@ const AdminPage: React.FC = () => {
   const { forceReturnSeat, sendAnnouncement } = useAdminWebSocket();
   const { seats, connected } = useSeatWebSocket(0); // userId 0 (관리자)
 
-  useNotification();
+  useGlobalNotification();
   
   // 간단한 인증
   const handleLogin = () => {
@@ -32,6 +32,8 @@ const AdminPage: React.FC = () => {
   
   // 긴급 공지
   const handleSendAnnouncement = () => {
+
+    console.log('🔔 관리자: 공지 전송 시도');
     if (!announcementText.trim()) {
       alert('공지 내용을 입력하세요');
       return;

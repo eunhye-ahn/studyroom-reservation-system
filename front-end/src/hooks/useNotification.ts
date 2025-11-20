@@ -15,6 +15,7 @@ const useNotification = (seatId : number | null) => {
     console.log('🔔 useNotification 훅 실행, seatId:', seatId);
     //websocket에서 메시지를 받으면
     isSubscribe.current = true;
+    //콜백함수 : 메시지를 받으면 실행되도록
     const unsubscribeAnnouncement = webSocketService.subscribeToAnnouncement(
       (notification:AdminNotification) => {
         console.log('긴급 공지 수신:', notification);
