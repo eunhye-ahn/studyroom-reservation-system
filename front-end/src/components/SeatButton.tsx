@@ -77,6 +77,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({roomId, onReserve }) => {
     
     // WebSocket 연결
     // webSocketService.connect(userId, numericRoomId);
+    webSocketService.joinRoom(numericRoomId);
 
     // 좌석 상태 변경 구독 : 메시지받으면 실행될 콜백함수 등록
     const unsubscribe = webSocketService.subscribeToMessages((message: SeatStatusMessage) => {

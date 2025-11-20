@@ -24,7 +24,16 @@ export function ActiveReservationModal({
 }) {
     dayjs.extend(relativeTime);
   const endISO = `${item.date}T${item.endTime}`;
+  const endDateTime = dayjs(endISO);
+  const now = dayjs();
+
+  if(endDateTime.isBefore(now)){
+    return null;
+  }
+
   const remain = dayjs(endISO).fromNow(true); // 예: "2시간"
+
+
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">

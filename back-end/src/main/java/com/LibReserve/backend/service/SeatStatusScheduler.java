@@ -22,11 +22,10 @@ public class SeatStatusScheduler {
 
 
 
-//    @Scheduled(fixedRate = 60*1000)
+    @Scheduled(fixedRate = 60*1000)
     public void updateSeatAvailablity() {
 
         LocalDateTime now = LocalDateTime.now();
-        System.out.println("[스케줄러 실행] 현재 시각: " + now);
 
         List<Reservation> expired = reservationRepository.findExpiredReservations(now);
         System.out.println("⏰ 만료된 예약 수: " + expired.size());
@@ -37,11 +36,11 @@ public class SeatStatusScheduler {
                     ", 종료 시각 = " + r.getEndDateTime() +
                     ", 좌석 ID = " + r.getSeat().getId());
 
-            List<Reservation> expiredReservation =
-                    reservationRepository.findExpiredReservations(now);
+            Seat seat = r.getSeat();
+            seat.setAvailable(true);
+            seatRepository.save(seat);
 
-                Seat seat = r.getSeat();
-                seat.setAvailable(true);
-                seatRepository.save(seat);
+            r.setStatus(ReservationStatus.COMPLETED);
+            reservationRepository.save(r);
         }
     }}
