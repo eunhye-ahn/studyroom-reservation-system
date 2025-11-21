@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -49,7 +50,7 @@ public class ReservationService {
 //    }
 
     @Transactional
-    public void createReservation(String email, ReservationRequest request){
+    public ReservationResponse createReservation(String email, ReservationRequest request){
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN,"사용자 정보를 찾을 수 없습니다."));
@@ -95,11 +96,17 @@ public class ReservationService {
                 new ReservationCreatedEvent(seat, user.getId())
         );
 
+        return new ReservationResponse(reservation);
+
     }
 
     // 트랜잭션 커밋 후 WebSocket 전송
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendWebSocketAfterCommit(ReservationCreatedEvent event) {
+
+        if (messagingTemplate == null) {
+            return;  // 테스트 환경에서는 그냥 스킵
+        }
         Seat seat = event.getSeat();
 
         SeatStatusMessage message = SeatStatusMessage.builder()
@@ -118,13 +125,39 @@ public class ReservationService {
 
     }
 
+    // 트랜잭션 커밋 후 WebSocket 전송
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void sendWebSocketAfterCancel(ReservationCanceledEvent event) {
+
+        if (messagingTemplate == null) {
+            return;  // 테스트 환경에서는 그냥 스킵
+        }
+        Seat seat = event.getSeat();
+
+        SeatStatusMessage message = SeatStatusMessage.builder()
+                .seatId(seat.getId())
+                .number(seat.getNumber())
+                .status(SeatStatusMessage.SeatStatus.AVAILABLE)
+                .userId(event.getUserId())
+                .type(SeatStatusMessage.MessageType.STATUS_CHANGE)
+                .build()
+                .withTimestamp();
+
+        messagingTemplate.convertAndSend(
+                "/topic/rooms/" + seat.getReadingRoom().getId() + "/seats",
+                message
+        );
+
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public List<ReservationResponse> getMyReservations(String email){
         return reservationRepository.findByUserEmail(email)
                 .stream()
                 .map(ReservationResponse::new)
                 .collect(Collectors.toList());
     }
-
+    @Transactional
     public void cancelReservation(Long reservationId, String email){
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN,"예약 정보를 찾을 수 없습니다."));
@@ -135,6 +168,10 @@ public class ReservationService {
         seat.setAvailable(true);
         seatRepository.save(seat);
         reservationRepository.delete(reservation);
+
+        applicationEventPublisher.publishEvent(
+                new ReservationCanceledEvent(seat, reservation.getUser().getId())
+        );
     }
 
     public List<ReservationResponse> getAllReservations(){
@@ -254,5 +291,14 @@ public class ReservationService {
             throw new RuntimeException("해당 예약에 접근할 수 없습니다.");
         }
         return reservation.getExtensionCount();
+    }
+
+    public void saveReservation(Reservation reservation) {
+        reservationRepository.save(reservation);
+    }
+
+    public Reservation findActiveBySeatId(Long seatId){
+        return reservationRepository.findBySeatIdAndStatus(seatId, ReservationStatus.ACTIVE)
+                .orElse(null);
     }
 }

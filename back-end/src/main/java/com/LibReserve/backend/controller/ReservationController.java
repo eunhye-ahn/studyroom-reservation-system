@@ -30,17 +30,17 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<String> create(@RequestBody ReservationRequest request,
+    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest request,
                                          HttpServletRequest httpRequest){
         String token = getTokenFromRequest(httpRequest);
         String email = jwtUtil.getEmailFromToken(token);
 
-        reservationService.createReservation(email, request);
+        ReservationResponse response = reservationService.createReservation(email, request);
 
 
 
 
-        return ResponseEntity.ok("예약 생성 완료 : "+ request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation,Long> {
@@ -67,4 +68,7 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
     @Query("SELECT r FROM Reservation r WHERE r.status = 'ACTIVE'" +
             "AND FUNCTION('TIMESTAMP', r.date, r.endTime) <= :now")
     List<Reservation> findExpiredReservations(@Param("now") LocalDateTime now);
+
+    //활성화된 예약 찾기
+    Optional<Reservation> findBySeatIdAndStatus(Long seatId, ReservationStatus status);
 }

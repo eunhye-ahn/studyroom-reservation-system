@@ -128,13 +128,15 @@ const RoomAsideList = () => {
                     className="cursor-pointer"
                   >{room.name}</div>
                   <div className="w-52 h-6 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#3343F3]  text-xs text-white flex items-center justify-center"
+                    <div className="h-full relative">
+                    <div className="h-full bg-[#3343F3] absolute top-0 left-0"
                       style={{
                         width: `${(room.availableSeats / room.totalSeats) * 100}%`,
-                      }}>
+                      }} />
+                        <div className="h-full relative flex items-center justify-center text-xs text-white">
                       {room.availableSeats}/{room.totalSeats}
-                      
-                      
+
+                    </div>
                     </div>
 
                   </div>

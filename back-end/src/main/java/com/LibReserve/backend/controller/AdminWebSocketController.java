@@ -1,15 +1,22 @@
 package com.LibReserve.backend.controller;
 
+import com.LibReserve.backend.domain.Reservation;
+import com.LibReserve.backend.domain.ReservationStatus;
 import com.LibReserve.backend.domain.Seat;
 import com.LibReserve.backend.dto.AdminControlRequest;
 import com.LibReserve.backend.dto.AdminNotification;
 import com.LibReserve.backend.dto.SeatStatusMessage;
+import com.LibReserve.backend.service.ReservationService;
 import com.LibReserve.backend.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Slf4j
 @Controller
@@ -20,6 +27,7 @@ public class AdminWebSocketController {
 
 
     private static final String ADMIN_PASSWORD = "1234";
+    private final ReservationService reservationService;
 
     @MessageMapping("/admin/control")
     public void handleAdminControl(AdminControlRequest request){
@@ -49,6 +57,25 @@ public class AdminWebSocketController {
             seat.setAvailable(true);
             seatService.saveSeat(seat);
 
+
+
+            //해당좌석의 활성 예약 상태 변경
+            if(wasOccupied) {
+                try {
+                    //현재 활성화 된 예약 찾기
+                    Reservation activeReservation = reservationService.findActiveBySeatId(seatId);
+
+                    if (activeReservation != null) {
+                        activeReservation.setStatus(ReservationStatus.FORCE_RETURN);
+                        activeReservation.setEndDate(LocalDate.now());
+                        activeReservation.setEndTime(LocalTime.now());
+                        reservationService.saveReservation(activeReservation);
+                    }
+                } catch (Exception e) {
+                    log.error("예약 상태 업데이트 오류 :{}", e.getMessage());
+                }
+            }
+
             //메시지 생성(모두에게 반납됨을 알리도록 브로드캐스트)
             SeatStatusMessage statusUpdate = new SeatStatusMessage(
                     seatId,
@@ -57,7 +84,8 @@ public class AdminWebSocketController {
             );
             messagingTemplate.convertAndSend("/topic/seats", statusUpdate);
 
-            //해당좌석 사용자에게 개별 알림
+
+            //해당 좌석 사용자에게 개별 알림
             if(wasOccupied){
                 AdminNotification notification = new AdminNotification(
                         "FORCE_RETURNED",

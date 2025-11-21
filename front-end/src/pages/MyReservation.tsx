@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import {ReservationTimer} from "../components/ReservationTimer";
 import dayjs from "dayjs";
+import useReservationStore from "../store/useReservationStore";
 
 interface MyReserve {
     userEmail: string;
@@ -16,6 +17,7 @@ interface MyReserve {
 function MyReservation() {
     const [myReserveInfo, setMyReserveInfo] = useState<MyReserve[]>([]);
     const [extensionCountMap, setExtensionCountMap] = useState<{[key:number]:number}>({});
+    const {setMyReservations} = useReservationStore();
 
     const now = dayjs();
     const activeReservations = myReserveInfo.filter((res)=>
@@ -24,6 +26,8 @@ function MyReservation() {
     async function fetchMyReserveData() {
         const res = await axiosInstance.get("/reservation/my");
         setMyReserveInfo(res.data);
+
+        setMyReservations(res.data);
 
         const counts: {[key:number]:number}={};
         for(const reservation of res.data){

@@ -6,12 +6,6 @@ const NotificationModal = () => {
 
   if(!isOpen || !notification) return null;
 
-  // if (!notification) {
-  //   return <div style={{position: 'fixed', top: 0, left: 0, background: 'red', color: 'white', padding: '20px', zIndex: 9999}}>
-  //     테스트: notification이 null입니다
-  //   </div>;
-  // }
-
    //메시지 타입 확인
   const isForceReturn = notification.type === 'FORCE_RETURNED';
   const isAnnouncement = notification.type === 'ANNOUNCEMENT';

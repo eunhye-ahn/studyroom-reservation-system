@@ -8,6 +8,7 @@ import { login, fetchMe } from '../../api/auth';
 import { MyReserve } from '../../types/reservation.types';
 import dayjs from 'dayjs';
 import { ActiveReservationModal } from '../../components/ActiveReservationModal';
+import useReservationStore from '../../store/useReservationStore';
 
 const Login = () => {
 
@@ -15,6 +16,7 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
     const { setUser } = useUserStore();
+    const { currentReservationId, setCurrentReservationId } = useReservationStore();
 
     const [activeItem, setActiveItem] = useState<MyReserve | null>(null);
 
@@ -41,8 +43,8 @@ const Login = () => {
 
             const list: MyReserve[] = await axiosInstance.get("/reservation/my").then(r => r.data);
             const activeList = list.filter(isActive);
-            if (activeList.length > 0) {setActiveItem(activeList[0]);}
-            else {navigate("/home");}
+            if (activeList.length > 0) { setActiveItem(activeList[0]); }
+            else { navigate("/home"); }
 
 
         } catch (error) {
@@ -55,6 +57,7 @@ const Login = () => {
         await axiosInstance.delete(`/reservation/${id}`);
         alert("예약이 취소되었습니다.");
         setActiveItem(null);
+        setCurrentReservationId(null);
         navigate("/home");
 
     }
