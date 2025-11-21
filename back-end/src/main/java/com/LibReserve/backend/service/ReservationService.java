@@ -7,6 +7,7 @@ import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
 import com.LibReserve.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReadingRoomRepository readingRoomRepository;
@@ -65,7 +67,7 @@ public class ReservationService {
 
         //좌석 겹침
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
-                seat, date, startTime,endTime
+                seat.getId(), date, startTime,endTime, ReservationStatus.ACTIVE
         );
 //        boolean exists = reservationRepository.existsBySeatIdAndStatus(
 //                seat.getId(),
@@ -74,12 +76,12 @@ public class ReservationService {
 //        boolean exists = reservationRepository.existsActiveBySeatId(seat.getId());
 
         if(exists){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 예약된 좌석입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 예약된 좌석입니다.");
         }
 
         //사용자 겹침
         boolean userTaken = reservationRepository.existsByUserAndDateAndTimeOverlap(
-                user, date, startTime,endTime
+                user, date, startTime,endTime,ReservationStatus.ACTIVE
         );
         if(userTaken){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"이미 진행 중인 예약이 있습니다.");
@@ -159,15 +161,28 @@ public class ReservationService {
     }
     @Transactional
     public void cancelReservation(Long reservationId, String email){
+        log.info("예약 취소 시작");
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN,"예약 정보를 찾을 수 없습니다."));
         if(!reservation.getUser().getEmail().equals(email)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"본인의 예약만 취소할 수 있습니다.");
         }
-        Seat seat = reservation.getSeat();
-        seat.setAvailable(true);
-        seatRepository.save(seat);
-        reservationRepository.delete(reservation);
+        Seat seat = seatRepository.findById(reservation.getSeat().getId())
+                        .orElse(null);
+        log.info("예약 조회 완료");
+
+        if(seat != null) {
+            log.info("좌석 업데이트 시작");
+            seat.setAvailable(true);
+            seatRepository.save(seat);
+            log.info("좌석 업데이트 완료");
+
+        }
+
+        log.info("예약 상태 변경 시작: {}",reservation.getStatus());
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservationRepository.save(reservation);
+        log.info("예약 상태 변경 완료 : {}", reservation.getStatus());
 
         applicationEventPublisher.publishEvent(
                 new ReservationCanceledEvent(seat, reservation.getUser().getId())
@@ -188,7 +203,7 @@ public class ReservationService {
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN,"좌석 없음"));
 
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
-                seat, request.getDate(), request.getStartTime(), request.getEndTime()
+                seat.getId(), request.getDate(), request.getStartTime(), request.getEndTime(), ReservationStatus.ACTIVE
         );
 
         if(exists){
@@ -262,7 +277,7 @@ public class ReservationService {
         LocalDate newEndDate = newEnd.isBefore(newStart) ? date.plusDays(1) : date;
 
         boolean exists = reservationRepository.existsBySeatAndDateAndTimeOverlap(
-                reservation.getSeat(), date, newStart, newEnd
+                reservation.getSeat().getId(), date, newStart, newEnd, reservation.getStatus()
         );
 
         if (exists) {

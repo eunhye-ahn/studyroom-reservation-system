@@ -79,14 +79,14 @@ public class ReservationController {
         return ResponseEntity.ok("예약이 취소되었습니다.");
     }
 
-    //예약연장
-    @PostMapping("/{reservaionId}/extend")
-    public ResponseEntity<ReservationResponse> extendReservation(@PathVariable Long reservaionId,
+//    예약연장
+    @PostMapping("/{reservationId}/extend")
+    public ResponseEntity<ReservationResponse> extendReservation(@PathVariable Long reservationId,
                                                     HttpServletRequest httpRequest) {
         String token = getTokenFromRequest(httpRequest);
         String email = jwtUtil.getEmailFromToken(token);
 
-        ReservationResponse response = reservationService.extendReservation(reservaionId, email);
+        ReservationResponse response = reservationService.extendReservation(reservationId, email);
 
         return ResponseEntity.ok(response);
     }

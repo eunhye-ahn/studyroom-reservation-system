@@ -14,6 +14,7 @@ import webSocketService, {
 } from "../services/WebSocketService";
 import useNotification from "../hooks/useNotification";
 import useReservationStore from "../store/useReservationStore";
+import { fetchRooms } from "src/api/rooms";
 
 interface SeatButtonsProps {
   roomId: RoomId;
@@ -161,7 +162,6 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
         alert(`좌석 ${seat.number} 예약 완료!`);
         onReserve?.(seat.id);
         webSocketService.startHeartbeat(seat.id, seat.number, userId);
-
       } catch (error: any) {
         console.error('❌ 예약 실패:', error);
 
@@ -197,7 +197,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
         console.log('✅ 반납 성공 + WebSocket 전송');
         alert(`좌석 ${seat.number} 반납 완료!`);
         webSocketService.stopHeartbeat();
-
+        setCurrentReservationId(null);
       } catch (error: any) {
         console.error('❌ 반납 실패:', error);
 

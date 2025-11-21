@@ -21,13 +21,14 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
 
     // 좌석 겹침 검사
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM Reservation r " +
-            "WHERE r.seat = :seat AND r.date = :date " +
+            "WHERE r.seat.id = :seatId AND r.date = :date AND r.status = :status " +
             "AND (r.startTime < :endTime AND r.endTime > :startTime)")
     boolean existsBySeatAndDateAndTimeOverlap(
-            @Param("seat") Seat seat,
+            @Param("seatId") Long seatId,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime
+            @Param("endTime") LocalTime endTime,
+            @Param("status") ReservationStatus status
     );
 
     //좌석 겹침검사 ver2
@@ -42,13 +43,15 @@ public interface ReservationRepository extends JpaRepository<Reservation,Long> {
     from Reservation r
     where r.user = :user
     and r.date = :date
+    and r.status = :status
     and (r.startTime < :endTime and r.endTime > :startTime)
 """)
     boolean existsByUserAndDateAndTimeOverlap(
             @Param("user") User user,
             @Param("date") LocalDate date,
             @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime
+            @Param("endTime") LocalTime endTime,
+            @Param("status") ReservationStatus status
     );
 
 
