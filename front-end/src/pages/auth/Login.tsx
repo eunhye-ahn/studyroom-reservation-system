@@ -25,7 +25,7 @@ const Login = () => {
         const now = dayjs();
         const start = dayjs(`${r.date}T${r.startTime}`);
         const end = dayjs(`${r.date}T${r.endTime}`);
-        return now.isAfter(start) && now.isBefore(end);
+        return now.isAfter(start) && now.isBefore(end) && r.status === 'ACTIVE';
     }
 
 
@@ -45,6 +45,8 @@ const Login = () => {
             const activeList = list.filter(isActive);
             if (activeList.length > 0) { setActiveItem(activeList[0]); }
             else { navigate("/home"); }
+            console.log('📋 전체 예약 목록:', list);
+            console.log('실행중인 예약 :', activeList);
 
 
         } catch (error) {
@@ -54,13 +56,16 @@ const Login = () => {
     };
 
     async function cancelNow(id: number) {
+
         await axiosInstance.delete(`/reservation/${id}`);
         alert("예약이 취소되었습니다.");
         setActiveItem(null);
         setCurrentReservationId(null);
         navigate("/home");
 
+
     }
+
 
 
 

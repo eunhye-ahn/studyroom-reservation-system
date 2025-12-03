@@ -5,4 +5,5 @@ export type MyReserve = {
   date: string;
   startTime: string;
   endTime: string;
+  status: string;
 };

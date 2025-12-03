@@ -240,6 +240,7 @@ class WebSocketService {
 
   //강제 반납 알림 메시지 전송
   public subscribeToSeatNotification(seatId: number, callback: (notification: AdminNotification) => void) {
+    console.log('🔔 구독 시작: /topic/seat/' + seatId);
     if (!this.client || !this.client.connected) {
       console.warn('Websocket is not connected');
       return () => { };
@@ -248,6 +249,7 @@ class WebSocketService {
     const subscription = this.client.subscribe(
       `/topic/seat/${seatId}`,
       (message: any) => {
+        console.log('🔔 메시지 수신!', message.body);
         const notification: AdminNotification = JSON.parse(message.body);
         console.log("강제반납알림수신:", notification);
         callback(notification);
@@ -285,6 +287,7 @@ class WebSocketService {
 
   //방입장
   public joinRoom(roomId: number): void {
+
     console.log('방입장:', roomId);
 
     if (!this.client || !this.client.connected) {

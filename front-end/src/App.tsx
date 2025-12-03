@@ -29,6 +29,7 @@ function App() {
   const { currentSeatId, myReservations, setMyReservations } = useReservationStore();
 
 
+
   //웹소켓 전역연결
   useEffect(() => {
     console.log('웹소켓 전역 연결 시작');

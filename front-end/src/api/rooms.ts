@@ -47,28 +47,28 @@ export interface RoomInfo {
   totalSeats: number;
   availableSeats: number;
   categoryType?: {
-       displayName: string;
+    displayName: string;
     // code?: CategoryCode; // 서버가 code도 보내준다면
   };
-  categoryLabel?: string; 
-  }
+  categoryLabel?: string;
+}
 
 
 
 function normalizeRoom(raw: any): RoomInfo {
-let code: CategoryCode | undefined =
+  let code: CategoryCode | undefined =
     typeof raw.categoryType === 'string'
       ? raw.categoryType
       : raw.categoryType?.name ??
-        raw.category_type?.name ??
-        (typeof raw.category_type === 'string' ? raw.category_type : undefined);
+      raw.category_type?.name ??
+      (typeof raw.category_type === 'string' ? raw.category_type : undefined);
 
   const label: string | undefined =
     raw.categoryType?.displayName ??
     raw.category_type?.display_name ??
     (code ? LABEL_FROM_CODE[code] : undefined);
 
-      if (!code && label) {
+  if (!code && label) {
     const key = label.trim();
     code = LABEL_TO_CODE[key];
   }

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchRooms, RoomInfo, LABEL_TO_CODE } from "../../api/rooms";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axiosInstance";
+import webSocketService, { SeatStatus as WSSeatStatus, SeatStatusMessage } from "../../services/WebSocketService";
 
 
 const RoomAsideList = () => {
@@ -41,18 +42,11 @@ const RoomAsideList = () => {
         signal: controller.signal,
       })
       .then((res) => {
-        console.log("API 응답 성공:", res.data);
-        console.log("응답 데이터 길이:", res.data.length);
-        console.log("응답 데이터 내용:", res.data);
         setRooms(res.data);
       }
       )
       .catch((e) => {
         if (controller.signal.aborted) return;
-        console.error("[rooms] API 호출 실패:", e);
-        console.error("에러 응답:", e.response?.data);
-        console.error("에러 상태:", e.response?.status);
-        setErr("목록을 불러오지 못했어요.");
         setRooms([]);
       })
       .finally(() => {
@@ -62,11 +56,9 @@ const RoomAsideList = () => {
     return () => controller.abort();
   }, [mode, selectedFloor, selectedCategory, setRooms]);
 
-
-
   // 서버가 카테고리 필터를 처리하지만, 방어적으로 한 번 더 필터링
   const filteredRooms = useMemo(() => {
-    
+
 
     if (!selectedCategory) return rooms;
 
@@ -84,11 +76,11 @@ const RoomAsideList = () => {
     return filtered;
   }, [rooms, selectedCategory, selectedFloor]);
 
+
   const handleClickRoom = (roomId: number, roomName: string) => {
     setRoomName(roomName);
     setMode("room");
     openRoom(roomId);
-    
   };
 
   // if (mode !== "floor") return null;
@@ -120,27 +112,27 @@ const RoomAsideList = () => {
           filteredRooms.length > 0 ? (
             <ul className="divide-y divide-gray-500">
               {filteredRooms.map((room) => {
-                return(
-                
-                <li key={room.id} className="text-white flex items-center justify-between pt-3 pb-3 gap-4">
-                  <div
-                    onClick={() => handleClickRoom(room.id, room.name)}
-                    className="cursor-pointer"
-                  >{room.name}</div>
-                  <div className="w-52 h-6 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full relative">
-                    <div className="h-full bg-[#3343F3] absolute top-0 left-0"
-                      style={{
-                        width: `${(room.availableSeats / room.totalSeats) * 100}%`,
-                      }} />
+                return (
+
+                  <li key={room.id} className="text-white flex items-center justify-between pt-3 pb-3 gap-4">
+                    <div
+                      onClick={() => handleClickRoom(room.id, room.name)}
+                      className="cursor-pointer"
+                    >{room.name}</div>
+                    <div className="w-52 h-6 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full relative">
+                        <div className="h-full bg-[#3343F3] absolute top-0 left-0"
+                          style={{
+                            width: `${(room.availableSeats / room.totalSeats) * 100}%`,
+                          }} />
                         <div className="h-full relative flex items-center justify-center text-xs text-white">
-                      {room.availableSeats}/{room.totalSeats}
+                          {room.availableSeats}/{room.totalSeats}
+
+                        </div>
+                      </div>
 
                     </div>
-                    </div>
-
-                  </div>
-                </li>
+                  </li>
                 )
               }
               )}
@@ -169,7 +161,7 @@ const RoomAsideList = () => {
                 <li key={room.id} className="text-white  flex items-center justify-between pt-3 pb-3">
                   <div
                     onClick={() => handleClickRoom(room.id, room.name)}
-                      className="cursor-pointer"
+                    className="cursor-pointer"
                   >{room.name}</div>
                   <div className="w-54 h-6 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
                     <div className="h-full bg-[#3343F3] text-xs text-white flex items-center justify-center"

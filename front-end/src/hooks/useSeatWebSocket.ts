@@ -104,10 +104,13 @@ export const useSeatWebSocket = (userId: number, seatId?: number) => {
     // Cleanup
     return () => {
       unsubscribe();
+      if (unsubscribeForceReturn) {
+        unsubscribeForceReturn();
+      }
       // webSocketService.disconnect();
       // setConnected(false);
     };
-  }, [userId, selectedRoomId]);
+  }, [userId, selectedRoomId, seatId]);
 
   return { connected, seats };
 };

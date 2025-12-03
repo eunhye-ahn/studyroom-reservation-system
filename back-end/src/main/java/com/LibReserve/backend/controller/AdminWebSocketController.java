@@ -77,13 +77,24 @@ public class AdminWebSocketController {
             }
 
             //메시지 생성(모두에게 반납됨을 알리도록 브로드캐스트)
+//            SeatStatusMessage statusUpdate = new SeatStatusMessage(
+//                    seatId,
+//                    SeatStatusMessage.SeatStatus.AVAILABLE,
+//                    "관리자에 의해 반납됨"
+//            );
+//            messagingTemplate.convertAndSend("/topic/seats", statusUpdate);
+//
+//
+            Long roomId = seat.getReadingRoom().getId();
+
             SeatStatusMessage statusUpdate = new SeatStatusMessage(
                     seatId,
+                    roomId,
                     SeatStatusMessage.SeatStatus.AVAILABLE,
-                    "관리자에 의해 반납됨"
+                    null
             );
-            messagingTemplate.convertAndSend("/topic/seats", statusUpdate);
 
+            messagingTemplate.convertAndSend("/topic/rooms/" + roomId + "/seats", statusUpdate);
 
             //해당 좌석 사용자에게 개별 알림
             if(wasOccupied){

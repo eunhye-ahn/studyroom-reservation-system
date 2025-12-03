@@ -1,10 +1,14 @@
 package com.LibReserve.backend.dto;
 
 import com.LibReserve.backend.domain.Reservation;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+@Getter
+@Setter
 public class ReservationResponse {
     private Long Id;
     private String userEmail;
@@ -13,6 +17,7 @@ public class ReservationResponse {
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String status;
 
     public ReservationResponse(Reservation reservation) {
         this.Id = reservation.getId();
@@ -22,62 +27,7 @@ public class ReservationResponse {
         this.date = reservation.getDate();
         this.startTime = reservation.getStartTime();
         this.endTime = reservation.getEndTime();
+        this.status = reservation.getStatus().toString();
     }
 
-
-    public Long getId() {
-        return Id;
-    }
-
-    public void setId(Long id) {
-        Id = id;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
-
-    public String getReadingRoomName() {
-        return readingRoomName;
-    }
-
-    public void setReadingRoomName(String readingRoomName) {
-        this.readingRoomName = readingRoomName;
-    }
-
-    public int getSeatNumber() {
-        return seatNumber;
-    }
-
-    public void setSeatNumber(int seatNumber) {
-        this.seatNumber = seatNumber;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
 }

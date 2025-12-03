@@ -1,12 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import type { RoomId } from "../types/type"
 import { SEAT_BUTTON_BY_AREA } from "./constans/seats";
 import useRoomStore from "../store/useRoomStore";
 import axiosInstance from "../api/axiosInstance";
 import useSeatStore, { Seat } from "../store/useSeatStore";
 import useUserStore from "../store/useUserStore";
-import { useSeatWebSocket } from "../hooks/useSeatWebSocket";
-import { useParams } from "react-router-dom";
 
 import webSocketService, {
   SeatStatusMessage,
@@ -21,13 +19,14 @@ interface SeatButtonsProps {
   onReserve?: (seatId: number) => void;
 }
 
-interface SeatList {
+export interface SeatList {
   id: number;
   number: number;
   readingRoomName: string;
+  userId: number;
 }
 
-interface SeatStatus {
+export interface SeatStatusInfo {
   seatId: number;
   available: boolean;
 }
@@ -41,6 +40,8 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
   const userId = user?.id || null;
   const numericRoomId = Number(roomId);
 
+  const [mySeatId, setMySeatId] = useState<number | null>(null);
+
   // useNotification(selectedSeat?.id || null);
   const seatsButtons = SEAT_BUTTON_BY_AREA[numericRoomId as RoomId] ?? [];
   if (!seatsButtons.length) return null;
@@ -51,7 +52,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
       const seatList: SeatList[] = seatListRes.data;
 
       const statusRes = await axiosInstance.get(`/reading-rooms/${numericRoomId}/status`);
-      const statusList: SeatStatus[] = statusRes.data;
+      const statusList: SeatStatusInfo[] = statusRes.data;
 
       const combined: Seat[] = seatList.map((seat: any) => {
         const status = statusList.find(s => s.seatId === seat.id);
@@ -80,15 +81,16 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
     console.log(`🔌 WebSocket 연결 시도: 열람실 ${numericRoomId}`);
 
     // WebSocket 연결
-    // webSocketService.connect(userId, numericRoomId);
     webSocketService.joinRoom(numericRoomId);
 
     // 좌석 상태 변경 구독 : 메시지받으면 실행될 콜백함수 등록
     const unsubscribe = webSocketService.subscribeToMessages((message: SeatStatusMessage) => {
       // 좌석 상태 업데이트
+      console.log('🔔 메시지 수신:', message);
       setSeats((prevSeats: Seat[]) => {
         const updatedSeats = prevSeats.map((seat: Seat) => {
           if (seat.id === message.seatId) {
+            console.log('✅ 좌석 찾음:', seat.id);
             return {
               ...seat,
               available: message.status === WSSeatStatus.AVAILABLE
@@ -96,33 +98,81 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
           }
           return seat;
         });
+
+        const availableCount = updatedSeats.filter(
+          s => s.available === true && s.roomId === numericRoomId
+        ).length;
+
+        console.log('📊 계산된 사용가능 좌석:', availableCount);
+
+        useRoomStore.getState().updateRoomSeats(
+          numericRoomId,
+          availableCount
+        );
+
         return updatedSeats;
       });
 
       //rooms 업데이트 - aside 연동을 위해서
-      const currentRoom = useRoomStore.getState().rooms.find(
-        r => r.id === numericRoomId
-      );
+      //   const currentRoom = useRoomStore.getState().rooms.find(
+      //     r => r.id === numericRoomId
+      //   );
 
-      if (currentRoom) {
-        const seats = useSeatStore.getState().seats;
-        const availableCount = seats.filter(  // 오타 수정: avaialbaleCount → availableCount
-          s => s.available === true
-        ).length;
+      //   setTimeout(() => {
 
-        useRoomStore.getState().updateRoomSeats(
-          numericRoomId,  // selectedRoomId → numericRoomId
-          availableCount
-        );
-      }
+      //     if (currentRoom) {
+      //       const seats = useSeatStore.getState().seats;
+      //       const availableCount = seats.filter(
+      //         s => s.available === true && s.roomId === numericRoomId
+      //       ).length;
+
+      //       useRoomStore.getState().updateRoomSeats(
+      //         numericRoomId,
+      //         availableCount
+      //       );
+      //     }
+      //   }, 0);
     });
+
+
+    // rooms 업데이트 - aside 연동을 위해서
+    //   const currentRoom = useRoomStore.getState().rooms.find(
+    //     r => r.id === numericRoomId
+    //   );
+    // });
+
+    //강제반납알림 구독
+    let unsubscribeForceReturn: (() => void) | undefined;
+
+    if (mySeatId && userId) {
+      console.log("강제 반납 알림 구독 시작 : ,", mySeatId);
+      unsubscribeForceReturn = webSocketService.subscribeToSeatNotification(
+        mySeatId,
+        (notification) => {
+          console.log("좌석이 강제 반납되었습니다", notification);
+          alert(notification.message);
+
+          setCurrentReservationId(null);
+          setMySeatId(null);
+          webSocketService.stopHeartbeat();
+
+          fetchSeatData();
+        }
+      )
+    }
 
     // Cleanup : 컴포넌트 언마운트 시 연결해제
     return () => {
       unsubscribe();
+      if (unsubscribeForceReturn) {
+        console.log('강제반납 구독 해제:', mySeatId);
+        unsubscribeForceReturn();
+      }
+
       // webSocketService.disconnect();
     };
-  }, [numericRoomId, userId, setSeats]);
+  }, [numericRoomId, userId, setSeats, mySeatId]);
+
 
   const handleSeatClick = async (button: any) => {
     // zustand store에서 관리하는 seats배열에서의 number와 버튼의 라벨이 같다면?
@@ -158,6 +208,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
 
         console.log(useReservationStore.getState().currentReservationId);
 
+        setMySeatId(seat.id);
         console.log('✅ 예약 성공:', response.data);
         alert(`좌석 ${seat.number} 예약 완료!`);
         onReserve?.(seat.id);
@@ -198,6 +249,7 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
         alert(`좌석 ${seat.number} 반납 완료!`);
         webSocketService.stopHeartbeat();
         setCurrentReservationId(null);
+        setMySeatId(null);
       } catch (error: any) {
         console.error('❌ 반납 실패:', error);
 

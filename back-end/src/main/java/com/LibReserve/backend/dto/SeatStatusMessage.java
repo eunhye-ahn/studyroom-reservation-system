@@ -11,12 +11,14 @@ import java.time.LocalDateTime;
 @Builder
 public class SeatStatusMessage {
     private Long seatId;
+    private Long roomId;
     private int number;
     private SeatStatus status;
     private Long userId;
     private LocalDateTime timestamp;
     private MessageType type;
     private String message;
+
 
     public enum SeatStatus {
         AVAILABLE,      // 이용 가능
@@ -31,8 +33,9 @@ public class SeatStatusMessage {
         INITIAL_LOAD    // 초기 로드
     }
 
-    public SeatStatusMessage(Long seatId, SeatStatus status, String message){
+    public SeatStatusMessage(Long seatId, Long roomId, SeatStatus status, String message){
         this.seatId = seatId;
+        this.roomId = roomId;
         this.status = status;
         this.message = message;
     }
@@ -40,6 +43,7 @@ public class SeatStatusMessage {
     public SeatStatusMessage withTimestamp() {
         return new SeatStatusMessage(
                 this.seatId,
+                this.roomId,
                 this.number,
                 this.status,
                 this.userId,
