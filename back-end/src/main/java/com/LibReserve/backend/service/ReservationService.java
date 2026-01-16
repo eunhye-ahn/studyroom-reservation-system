@@ -2,6 +2,7 @@ package com.LibReserve.backend.service;
 
 import com.LibReserve.backend.domain.*;
 import com.LibReserve.backend.dto.*;
+import com.LibReserve.backend.event.SeatReturnedEvent;
 import com.LibReserve.backend.repository.ReservationRepository;
 import com.LibReserve.backend.repository.ReadingRoomRepository;
 import com.LibReserve.backend.repository.SeatRepository;
@@ -11,16 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +34,7 @@ public class ReservationService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<Reservation> getReservationsByEmail(String email){
         return reservationRepository.findByUserEmail(email);
@@ -161,22 +160,24 @@ public class ReservationService {
     }
     @Transactional
     public void cancelReservation(Long reservationId, String email){
-        log.info("예약 취소 시작");
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN,"예약 정보를 찾을 수 없습니다."));
+
+
         if(!reservation.getUser().getEmail().equals(email)){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,"본인의 예약만 취소할 수 있습니다.");
         }
         Seat seat = seatRepository.findById(reservation.getSeat().getId())
                         .orElse(null);
-        log.info("예약 조회 완료");
+
 
         if(seat != null) {
-            log.info("좌석 업데이트 시작");
+            Long roomId = seat.getReadingRoom().getId();
             seat.setAvailable(true);
             seatRepository.save(seat);
-            log.info("좌석 업데이트 완료");
-
+            eventPublisher.publishEvent(
+                    new SeatReturnedEvent(roomId, seat)
+            );
         }
 
         log.info("예약 상태 변경 시작: {}",reservation.getStatus());
@@ -316,4 +317,5 @@ public class ReservationService {
         return reservationRepository.findBySeatIdAndStatus(seatId, ReservationStatus.ACTIVE)
                 .orElse(null);
     }
+
 }

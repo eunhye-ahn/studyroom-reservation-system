@@ -10,19 +10,30 @@ import { RoomInfo } from '../../api/rooms';
 import { LABEL_TO_CODE } from '../../api/rooms';
 import api from "../../api/axiosInstance";
 import useSeatStore from '../../store/useSeatStore';
+import './AdminPage.css';
+
+type TabType = 'dashboard' | 'seats' | 'announcement';
+
 
 const AdminPage: React.FC = () => {
+  //인증
   const [password, setPassword] = useState('');
-  const [announcementText, setAnnouncementText] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  //탭
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+
+  //공지
+  const [announcementText, setAnnouncementText] = useState('');
+
+  //좌석/방
   const [totalRooms, setTotalRooms] = useState<RoomInfo[]>([]);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null); // 새로 추가
+  const [selectedRoomForDetail, setSelectedRoomForDetail] = useState<number | null>(null); // 새로 추가
 
   const { forceReturnSeat, sendAnnouncement } = useAdminWebSocket();
 
   const { seats, connected } = useSeatWebSocket(0); // userId 0 (관리자)
-
-  const [selectedRoomForSeats, setSelectedRoomForSeats] = useState<number | null>(null); // 선택된 방 ID
-
 
 
   //좌석 로드
@@ -42,7 +53,30 @@ const AdminPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // 통계 계산
+  const statistics = useMemo(() => {
+    const total = totalRooms.reduce((sum, room) => sum + room.totalSeats, 0);
+    const available = totalRooms.reduce((sum, room) => sum + room.availableSeats, 0);
+    const occupied = total - available;
+    const usageRate = total > 0 ? ((occupied / total) * 100).toFixed(1) : '0';
+
+    return { total, available, occupied, usageRate };
+  }, [totalRooms]);
+
+  // 카테고리별 방 그룹화
+  const roomsByCategory = useMemo(() => {
+    const grouped: Record<string, RoomInfo[]> = {};
+    totalRooms.forEach(room => {
+      const category = room.categoryType?.displayName || '기타';
+      if (!grouped[category]) grouped[category] = [];
+      grouped[category].push(room);
+    });
+    return grouped;
+  }, [totalRooms]);
+
   useEffect(() => {
+
+
     if (mode !== "floor" || !selectedFloor) return;
 
     const controller = new AbortController(); // axios v1: AbortController 지원
@@ -94,11 +128,20 @@ const AdminPage: React.FC = () => {
     return filtered;
   }, [rooms, selectedCategory, selectedFloor]);
 
-  const handleClickRoom = (roomId: number, roomName: string) => {
+  const handleViewRoomDetails = (roomId: number, roomName: string) => {
+
     setRoomName(roomName);
     setMode("room");
-    openRoom(roomId); // selectedRoomId 업데이트 → useSeatWebSocket이 자동으로 해당 방 연결
+    openRoom(roomId);
+    setSelectedRoomForDetail(roomId);
+    setExpandedCategory(null);
+
   };
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategory(expandedCategory === category ? null : category);
+  };
+
 
   useGlobalNotification();
 
@@ -127,8 +170,8 @@ const AdminPage: React.FC = () => {
   };
 
   // 강제 반납
-  const handleForceReturn = (seatId: number) => {
-    if (window.confirm(`좌석 ${seatId}번을 강제 반납하시겠습니까?`)) {
+  const handleForceReturn = (seatId: number, seatNumber: number) => {
+    if (window.confirm(`좌석 ${seatNumber}번을 강제 반납하시겠습니까?`)) {
       forceReturnSeat(seatId, password);
     }
   };
@@ -136,7 +179,7 @@ const AdminPage: React.FC = () => {
   // 긴급 공지
   const handleSendAnnouncement = () => {
 
-    console.log('🔔 관리자: 공지 전송 시도');
+    console.log('관리자: 공지 전송 시도');
     if (!announcementText.trim()) {
       alert('공지 내용을 입력하세요');
       return;
@@ -169,134 +212,196 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="admin-page">
-      <h1>🔧 관리자 페이지</h1>
-
-      <div className="connection-status">
-        WebSocket: {connected ? '✅ 연결됨' : '❌ 연결 안 됨'}
+      {/* 헤더 */}
+      <div className="admin-header">
+        <h1>관리자 대시보드</h1>
+        <div className="connection-status">
+          WebSocket: {connected ? '연결됨' : '연결 안 됨'}
+        </div>
       </div>
 
-      {/* 긴급 공지 섹션 */}
-      <div className="announcement-section">
-        <h2>📢 긴급 공지</h2>
-        <textarea
-          placeholder="모든 사용자에게 보낼 공지를 입력하세요"
-          value={announcementText}
-          onChange={(e) => setAnnouncementText(e.target.value)}
-          rows={4}
-        />
+      {/* 탭 네비게이션 */}
+      <div className="tab-navigation">
         <button
-          className="send-announcement-btn"
-          onClick={handleSendAnnouncement}
+          className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboard')}
         >
-          공지 전송
+          대시보드
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'seats' ? 'active' : ''}`}
+          onClick={() => setActiveTab('seats')}
+        >
+          좌석 관리
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'announcement' ? 'active' : ''}`}
+          onClick={() => setActiveTab('announcement')}
+        >
+          긴급 공지
         </button>
       </div>
 
-      {/* 좌석 관리 섹션 */}
-      <div className="seat-management-section">
-        <h2>💺 좌석 관리</h2>
-        {/* <div className="seat-list">
-          {seats.map((seat) => (
-            <div key={seat.seatId} className={`seat-item ${seat.status}`}>
-              <div className="seat-info">
-                <span className="seat-number">좌석 {seat.seatId}번</span>
-                <span className={`seat-status ${seat.status}`}>
-                  {seat.status === 'AVAILABLE' ? '사용 가능' : '사용 중'}
-                </span>
+      {/* 탭 내용 */}
+      <div className="tab-content">
+        {activeTab === 'dashboard' && (
+
+          <div className="dashboard-tab">
+            {/* 통계 카드 */}
+            <div className="statistics-grid">
+              <div className="stat-card">
+                <div className="stat-label">전체 좌석</div>
+                <div className="stat-value">{statistics.total}</div>
               </div>
+              <div className="stat-card occupied">
+                <div className="stat-label">사용 중</div>
+                <div className="stat-value">{statistics.occupied}</div>
+              </div>
+              <div className="stat-card available">
+                <div className="stat-label">사용 가능</div>
+                <div className="stat-value">{statistics.available}</div>
+              </div>
+              <div className="stat-card usage">
+                <div className="stat-label">사용률</div>
+                <div className="stat-value">{statistics.usageRate}%</div>
+              </div>
+            </div>
+
+            {/* 전체 방 현황 */}
+            <div className="rooms-overview">
+              <h3>전체 열람실 현황</h3>
+              {Object.entries(roomsByCategory).map(([category, rooms]) => (
+                <div key={category} className="category-section">
+                  <h4>{category}</h4>
+                  <div className="rooms-grid">
+                    {rooms.map(room => (
+                      <div key={room.id} className="room-card-mini">
+                        <div className="room-name">{room.name}</div>
+                        <div className="room-status">
+                          <span className="available">{room.availableSeats}</span>
+                          <span className="divider">/</span>
+                          <span className="total">{room.totalSeats}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'seats' && (
+          <div className="seats-tab">
+            <h3>좌석 관리</h3>
+
+            {/* 카테고리별 접기/펼치기 */}
+            {Object.entries(roomsByCategory).map(([category, rooms]) => (
+              <div key={category} className="category-accordion">
+                <div
+                  className="category-header"
+                  onClick={() => toggleCategory(category)}
+                >
+                  <h4>
+                    {expandedCategory === category ? '▼' : '▶'} {category}
+                  </h4>
+                  <span className="category-summary">
+                    {rooms.reduce((sum, r) => sum + r.totalSeats - r.availableSeats, 0)} /
+                    {' '}{rooms.reduce((sum, r) => sum + r.totalSeats, 0)} 사용 중
+                  </span>
+                </div>
+
+                {expandedCategory === category && (
+                  <div className="rooms-list">
+                    {rooms.map(room => (
+                      <div key={room.id} className="room-item">
+                        <div className="room-info">
+                          <span className="room-name">{room.name}</span>
+                          <span className="room-seats">
+                            {room.availableSeats}/{room.totalSeats}
+                          </span>
+                        </div>
+                        <button
+                          className="view-details-btn"
+                          onClick={() => handleViewRoomDetails(room.id, room.name)}
+                        >
+                          상세보기
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {selectedRoomId && (
+              <div className="room-details">
+                <div className="details-header">
+                  <h4>
+                    {rooms.find(r => r.id === selectedRoomId)?.name} - 사용 중인 좌석
+                  </h4>
+                  <button
+                    className="close-btn"
+                    onClick={() => openRoom(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="seat-list">
+                  {seats.length > 0 ? (
+                    seats.map((seat) => (
+                      <div key={seat.seatId} className="seat-item">
+                        <div className="seat-info">
+                          <span className="seat-number">좌석 {seat.number}번</span>
+                          <span className="seat-status occupied">사용 중</span>
+                        </div>
+                        <button
+                          className="force-return-btn"
+                          onClick={() => handleForceReturn(seat.seatId, seat.number)}
+                        >
+                          강제 반납
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-seats">현재 사용 중인 좌석이 없습니다.</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        {activeTab === 'announcement' && (
+          <div className="announcement-tab">
+            <h3>긴급 공지 발송</h3>
+            <div className="announcement-form">
+              <textarea
+                placeholder="모든 사용자에게 보낼 긴급 공지를 입력하세요"
+                value={announcementText}
+                onChange={(e) => setAnnouncementText(e.target.value)}
+                rows={6}
+              />
               <button
-                className="force-return-btn"
-                onClick={() => handleForceReturn(seat.seatId)}
-                disabled={seat.status === 'AVAILABLE'}
+                className="send-announcement-btn"
+                onClick={handleSendAnnouncement}
               >
-                강제 반납
+                전체 사용자에게 발송
               </button>
             </div>
-          ))}
-        </div> */}
-        {/* {!selectedRoomId && (
-          <> */}
-        <div>
-          <button onClick={() => setSelectedCategory("자료관")}>
-            자료관
-          </button>
 
-          {selectedCategory === "자료관" && (
-            filteredRooms.length > 0 ? (
+            <div className="announcement-guide">
+              <h4>사용 안내</h4>
               <ul>
-                {filteredRooms.map((room) => (
-                  <li key={room.id}>
-                    <div onClick={() => handleClickRoom(room.id, room.name)}>
-                      {room.name}
-                    </div>
-                    <div>
-                      {room.availableSeats}/{room.totalSeats}
-                    </div>
-                  </li>
-                ))}
+                <li>긴급 공지는 현재 접속 중인 모든 사용자에게 즉시 전송됩니다</li>
+                <li>중요한 내용만 간결하게 작성해주세요</li>
+                <li>예시: "시스템 점검으로 15:00~16:00 서비스가 일시 중단됩니다"</li>
               </ul>
-            ) : (
-              <p>자료관에 방이 없습니다.</p>
-            )
-          )}
-        </div>
-
-        <div>
-          <button onClick={() => setSelectedCategory("학습관")}>
-            학습관
-          </button>
-
-          {selectedCategory === "학습관" && (
-            filteredRooms.length > 0 ? (
-              <ul>
-                {filteredRooms.map((room) => (
-                  <li key={room.id}>
-                    <div onClick={() => handleClickRoom(room.id, room.name)}>
-                      {room.name}
-                    </div>
-                    <div>
-                      {room.availableSeats}/{room.totalSeats}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>학습관에 방이 없습니다.</p>
-            )
-          )}
-        </div>
-        {/* </>
-        )} */}
-        {selectedRoomId && (
-          <div className="selected-room-seats">
-            <h3>
-              {rooms.find(r => r.id === selectedRoomId)?.name} - 사용중인 좌석
-            </h3>
-            <div className="seat-list">
-              {seats.length > 0 ? (
-                seats.map((seat) => (
-                  <div key={seat.seatId} className="seat-item">
-                    <div className="seat-info">
-                      <span className="seat-number">좌석 {seat.number}번</span>
-                      <span className="seat-status">사용 중</span>
-                    </div>
-                    <button
-                      className="force-return-btn"
-                      onClick={() => handleForceReturn(seat.seatId)}
-                    >
-                      강제 반납
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p>현재 사용중인 좌석이 없습니다.</p>
-              )}
             </div>
           </div>
         )}
       </div>
     </div>
-
   );
 };
 

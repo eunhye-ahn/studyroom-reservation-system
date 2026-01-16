@@ -39,8 +39,6 @@ const Login = () => {
             const me = await fetchMe();
             setUser(me);
 
-            alert("로그인 성공!");
-
             const list: MyReserve[] = await axiosInstance.get("/reservation/my").then(r => r.data);
             const activeList = list.filter(isActive);
             if (activeList.length > 0) { setActiveItem(activeList[0]); }

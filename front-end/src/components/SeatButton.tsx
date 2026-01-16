@@ -5,6 +5,7 @@ import useRoomStore from "../store/useRoomStore";
 import axiosInstance from "../api/axiosInstance";
 import useSeatStore, { Seat } from "../store/useSeatStore";
 import useUserStore from "../store/useUserStore";
+import { addToWaitingQueue, getWaitingListByRoom } from "../api/waitingApi";
 
 import webSocketService, {
   SeatStatusMessage,
@@ -12,7 +13,7 @@ import webSocketService, {
 } from "../services/WebSocketService";
 import useNotification from "../hooks/useNotification";
 import useReservationStore from "../store/useReservationStore";
-import { fetchRooms } from "src/api/rooms";
+import { fetchRooms } from "../api/rooms";
 
 interface SeatButtonsProps {
   roomId: RoomId;
@@ -31,11 +32,16 @@ export interface SeatStatusInfo {
   available: boolean;
 }
 
+let globalLatencies: number[] = [];
+
 const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
   const { seats, setSeats, setLoading, selectedSeat } = useSeatStore();
   const { user } = useUserStore();
   const { myReservations, setMyReservations, currentReservationId, setCurrentReservationId } = useReservationStore();
   const reservationStore = useReservationStore.getState();
+
+  const [waitingCount, setWaitingCount] = useState<number>(0);
+  const [isRoomFull, setIsRoomFull] = useState<boolean>(false);
 
   const userId = user?.id || null;
   const numericRoomId = Number(roomId);
@@ -45,6 +51,45 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
   // useNotification(selectedSeat?.id || null);
   const seatsButtons = SEAT_BUTTON_BY_AREA[numericRoomId as RoomId] ?? [];
   if (!seatsButtons.length) return null;
+
+  //만석여부 확인 - 열람실
+  useEffect(() => {
+    if (seats.length > 0) {
+      const availableSeats = seats.filter(s => s.available && s.roomId === numericRoomId);
+      setIsRoomFull(availableSeats.length === 0);
+    }
+  }, [seats, numericRoomId]);
+
+  //대기자수 조회
+  useEffect(() => {
+    const fetchWaitingCount = async () => {
+      try {
+        const WaitingList = await getWaitingListByRoom(numericRoomId)
+        setWaitingCount(WaitingList.length);
+      } catch (error) {
+        console.error('대기자 수 조회 실패:', error);
+      }
+    };
+
+    fetchWaitingCount();
+  }, [numericRoomId]);
+
+  //대기등록 핸들러
+  const handleAddToWaiting = async () => {
+    if (!userId) {
+      alert('로그인이 필요합니다.')
+      return;
+    }
+
+    try {
+      const result = await addToWaitingQueue(userId, numericRoomId);
+      alert(`대기등록완료!\n현재 ${result.queuePosition}번째 대기 중입니다.}`);
+      setWaitingCount(prev => prev + 1);
+    } catch (error: any) {
+      const message = error.response?.data || error.message;
+      alert('대기등록실패:' + message);
+    }
+  };
 
   async function fetchSeatData() {
     try {
@@ -83,8 +128,33 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
     // WebSocket 연결
     webSocketService.joinRoom(numericRoomId);
 
+
+
     // 좌석 상태 변경 구독 : 메시지받으면 실행될 콜백함수 등록
     const unsubscribe = webSocketService.subscribeToMessages((message: SeatStatusMessage) => {
+      if (message.type === 'HEARTBEAT') {
+        return;
+      }
+
+      const receivedAt = Date.now();
+      const sentAt = new Date(message.timestamp).getTime();
+      const latency = receivedAt - sentAt;
+
+      // ✅ 전역 배열 사용
+      globalLatencies.push(latency);
+
+      const avg = globalLatencies.reduce((a, b) => a + b, 0) / globalLatencies.length;
+      const max = Math.max(...globalLatencies);
+      const min = Math.min(...globalLatencies);
+
+      console.log(` WebSocket 성능 [${globalLatencies.length}회]:`, {
+        현재_지연: `${latency}ms`,
+        평균_지연: `${avg.toFixed(1)}ms`,
+        최대_지연: `${max}ms`,
+        최소_지연: `${min}ms`,
+        좌석: message.seatId,
+        상태: message.status
+      });
       // 좌석 상태 업데이트
       console.log('🔔 메시지 수신:', message);
       setSeats((prevSeats: Seat[]) => {
@@ -272,49 +342,85 @@ const SeatButtons: React.FC<SeatButtonsProps> = ({ roomId, onReserve }) => {
   // }
 
   return (
-    <g>
-      {seatsButtons.map((button) => {
-        const seat = seats.find(s =>
-          s.roomId === numericRoomId && s.number === Number(button.label)
-        );
-        const isAvailable = seat?.available ?? true;
+    <>
+      {/* 대기 버튼 - 만석일 때만 표시 */}
+      {isRoomFull && (
+        <foreignObject x="10" y="10" width="150" height="80">
+          <div style={{
+            background: 'rgba(255, 193, 7, 0.9)',
+            padding: '10px',
+            borderRadius: '8px',
+            color: 'white'
+          }}>
+            <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '5px' }}>
+              만석입니다
+            </div>
+            <div style={{ fontSize: '12px', marginBottom: '8px' }}>
+              대기자: {waitingCount}명
+            </div>
+            <button
+              onClick={handleAddToWaiting}
+              style={{
+                width: '100%',
+                padding: '5px',
+                background: 'white',
+                color: '#ff9800',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 'bold'
+              }}
+            >
+              대기 신청
+            </button>
+          </div>
+        </foreignObject>
+      )}
+      <g>
+        {seatsButtons.map((button) => {
+          const seat = seats.find(s =>
+            s.roomId === numericRoomId && s.number === Number(button.label)
+          );
+          const isAvailable = seat?.available ?? true;
 
-        return (
-          <g
-            key={button.label}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSeatClick(button);
-            }}
-            style={{
-              cursor: "pointer"
-            }}
-            aria-label={`Seat ${button.label}`}
-            role="button"
-          >
-            <rect
-              x={button.x}
-              y={button.y}
-              width={button.w}
-              height={button.h}
-              rx={2}
-              fill={isAvailable ? "rgba(70,193,29)" : "rgba(205,0,0)"}
-            />
-            {button.label && (
-              <text
-                x={button.x + button.w / 2}
-                y={button.y + button.h / 2 + 3}
-                fill="white"
-                fontSize={10}
-                textAnchor="middle"
-              >
-                {button.label}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </g>
+          return (
+            <g
+              key={button.label}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSeatClick(button);
+              }}
+              style={{
+                cursor: "pointer"
+              }}
+              aria-label={`Seat ${button.label}`}
+              role="button"
+            >
+              <rect
+                x={button.x}
+                y={button.y}
+                width={button.w}
+                height={button.h}
+                rx={2}
+                fill={isAvailable ? "rgba(70,193,29)" : "rgba(205,0,0)"}
+              />
+              {button.label && (
+                <text
+                  x={button.x + button.w / 2}
+                  y={button.y + button.h / 2 + 3}
+                  fill="white"
+                  fontSize={10}
+                  textAnchor="middle"
+                >
+                  {button.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </g>
+    </>
   );
 };
 

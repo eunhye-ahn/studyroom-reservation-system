@@ -14,16 +14,16 @@ import { Seat } from "../store/useSeatStore";
 const MainSection: React.FC = () => {
 
 
-    const { roomName, selectedFloor,setSelectedFloor,setSelectedCategory, selectedRoomId: selectedRoomId, openRoom: openArea, mode, setSeatsInRoom: setSeatsInRoom } = useRoomStore();
+    const { roomName, selectedFloor, setSelectedFloor, setSelectedCategory, selectedRoomId: selectedRoomId, openRoom: openArea, mode, setSeatsInRoom: setSeatsInRoom } = useRoomStore();
     const [roomImage, setRoomImage] = useState<string>("");
     const [seats, setSeats] = useState<Seat[]>([]);
 
 
 
-    useEffect(()=>{
+    useEffect(() => {
         setSelectedFloor(1);
         setSelectedCategory("자료관");
-},[]);
+    }, []);
 
     useEffect(() => {
         let alive = true;
@@ -57,16 +57,16 @@ const MainSection: React.FC = () => {
     //mapping
     const ROOM_BY_BUTTON_ID: Record<string, { roomId: RoomId; image: string, displayName?: string }> = {
         "1": { roomId: 1, image: "map/1_book_A.jpg", displayName: "책마당A" },
-        "2": { roomId: 6, image: "map/1_eulim_A.jpg", displayName: "어울림A" },
+        "2": { roomId: 4, image: "map/1_eulim_A.jpg", displayName: "어울림A" },
         "6": { roomId: 3, image: "map/1_media_pc.jpg", displayName: "미디어라운지 pc 이용석" },
-        "7": { roomId: 4, image: "map/2_study201.jpg", displayName: "열람실 201호" },
-        "8": { roomId: 5, image: "map/2_study202.jpg", displayName: "열람실 202호" },
+        "7": { roomId: 5, image: "map/2_study201.jpg", displayName: "열람실 201호" },
+        "8": { roomId: 6, image: "map/2_study202.jpg", displayName: "열람실 202호" },
         "11": { roomId: 2, image: "map/2_chang_A.jpg", displayName: "창의마루A" },
         "12": { roomId: 9, image: "map/2_chang_B.jpg", displayName: "창의마루B" },
         "14": { roomId: 7, image: "map/3_hae_A.jpg", displayName: "해오름마루A" },
         "15": { roomId: 8, image: "map/3_hae_B.jpg", displayName: "해오름마루B" },
         "20": { roomId: 10, image: "map/4_study404.jpg", displayName: "열람실 404호" },
-        
+
     };
 
     // 이미지 선택
@@ -81,7 +81,7 @@ const MainSection: React.FC = () => {
         8: "map/3_hae_B.jpg",
         9: "map/2_chang_B.jpg",
         10: "map/4_study404.jpg",
-        
+
 
     };
 
@@ -110,7 +110,7 @@ const MainSection: React.FC = () => {
         console.log(hit.roomId);
     }
 
-    
+
 
 
     return (
@@ -145,23 +145,23 @@ const MainSection: React.FC = () => {
                     {mode === 'room' && selectedRoomId && (
                         <SeatButton
                             roomId={selectedRoomId}
-                                // try {
-                                // }
-                                // catch (error: any) {
-                                //     console.error("예약실패 : ", error);
-                                //     console.error("예약 실패 상세:", error.response?.status);
-                                //     let msg = "예약 실패";
-                                //     if (error.response?.data) {
-                                //         if (typeof error.response.data === "string") {
-                                //             msg = error.response.data;
-                                //         } else if (typeof error.response.data.message === "string") {
-                                //             msg = error.response.data.message;
-                                //         }
-                                //     }
-                                //     alert(msg);
+                        // try {
+                        // }
+                        // catch (error: any) {
+                        //     console.error("예약실패 : ", error);
+                        //     console.error("예약 실패 상세:", error.response?.status);
+                        //     let msg = "예약 실패";
+                        //     if (error.response?.data) {
+                        //         if (typeof error.response.data === "string") {
+                        //             msg = error.response.data;
+                        //         } else if (typeof error.response.data.message === "string") {
+                        //             msg = error.response.data.message;
+                        //         }
+                        //     }
+                        //     alert(msg);
 
-                                // }
-                            
+                        // }
+
                         />
                     )}
                 </svg>

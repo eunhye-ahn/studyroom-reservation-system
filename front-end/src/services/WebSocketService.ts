@@ -1,5 +1,6 @@
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { WaitingQueue } from '../api/waitingApi';
 
 export enum MessageType {
   STATUS_CHANGE = 'STATUS_CHANGE',  // ← 값 할당 필요!
@@ -14,6 +15,11 @@ export enum SeatStatus {
   OUT_OF_SERVICE = 'OUT_OF_SERVICE'
 }
 
+export interface WaitingUpdateMessage {
+  action: 'ADDED' | 'ASSIGNED' | 'CONFIRMED' | 'EXPIRED' | 'CANCELLED' | 'POSITION_UPDATED';
+  waiting: WaitingQueue;
+}
+
 export interface SeatStatusMessage {
   seatId: number,
   number: number,
@@ -24,6 +30,7 @@ export interface SeatStatusMessage {
 }
 
 export interface AdminNotification {
+  id: number;
   type: 'ANNOUNCEMENT' | 'FORCE_RETURNED';
   message: string;
   seatId: number | null;
@@ -51,6 +58,9 @@ class WebSocketService {
   private messageCallbacks: Set<MessageCallback> = new Set();
   private announcementCallbacks: Set<(notification: AdminNotification) => void> = new Set();
   private forceReturnCallbacks: Set<(notification: AdminNotification) => void> = new Set();
+
+  //구독 map으로 관리
+  private subscriptions: Map<string, StompSubscription> = new Map();
 
   //웹소켓 클라이언트 생성
   constructor() {
@@ -90,25 +100,20 @@ class WebSocketService {
 
   private onConnect(): void {
     //긴급 공지 구독(조건없이 무조건구독) > 메시지 받으면 콜백실행
-    this.client?.subscribe('/topic/announcements', (message: IMessage) => {
-      try {
-        const notification: AdminNotification = JSON.parse(message.body);
-        console.log('긴급공지수신:', notification);
-
-        //등록된 모든 콜백 실행
-        this.announcementCallbacks.forEach(callback => callback(notification));
-      } catch (e) {
-        console.error('파싱에러:', e);
-      }
+    const announcementSub = this.client?.subscribe('/topic/announcements', (message: IMessage) => {
+      const notification: AdminNotification = JSON.parse(message.body);
+      //등록된 모든 콜백 실행
+      this.announcementCallbacks.forEach(callback => callback(notification));
     });
-    console.log('구독 완료');
 
+    if (announcementSub) {
+      this.subscriptions.set('announcements', announcementSub);
+    }
 
     if (this.currentRoomId !== null) {
       //좌석 상태 구독
       this.subscribeToRoom(this.currentRoomId);
     }
-    console.log('구독완료');
   }
 
   //콜백등록
@@ -122,15 +127,18 @@ class WebSocketService {
 
   //연결 종료
   public disconnect(): void {
-    // 연결되어 있을 때만 해제
-    if (this.client && this.client.connected) {
-      this.client.deactivate();
-    }
 
+    //구독정리
     if (this.currentRoomSubscription) {
       this.currentRoomSubscription.unsubscribe();
       this.currentRoomSubscription = null;
-      console.log('🪑 [WS] 방 구독 해제됨');
+    }
+    
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions.clear();
+    
+    if (this.client && this.client.connected) {
+      this.client.deactivate();
     }
 
     this.currentRoomId = null; //초기화
@@ -158,27 +166,44 @@ class WebSocketService {
     });
   }
 
-  // 좌석 사용 시작
-  // public startUsingSeat(seatId: number, seatNumber: number, userId: number): void {
-  //   if (!this.client || !this.client.connected) {
-  //     console.error('WebSocket is not connected');
-  //     return;
-  //   }
+  //특정열람실의대기열구독
+  subscribeToWaitingQueue(
+    roomId: number,
+    callback: (data: WaitingUpdateMessage)
+      => void
+  ) {
+    if (!this.client?.connected) return;
 
-  //   const message: SeatStatusMessage = {
-  //     seatId,
-  //     number: seatNumber,
-  //     status: SeatStatus.OCCUPIED,
-  //     userId,
-  //     timestamp: new Date().toISOString(),
-  //     type: MessageType.STATUS_CHANGE,
-  //   };
+    const subscription = this.client.subscribe(
+      `/topic/waiting/${roomId}`,
+      (message) => {
+        const data = JSON.parse(message.body);
+        callback(data);
+      }
+    );
 
-  //   this.client.publish({
-  //     destination: '/app/seat.updateStatus',
-  //     body: JSON.stringify(message),
-  //   });
-  // }
+    this.subscriptions.set(`waiting-${roomId}`, subscription)
+
+
+  }
+
+  //개인 대기 알림 구독 (배정, 만료)
+  subscribeToPersonalWaitingNotification(
+    userId: number,
+    callback: (data: WaitingUpdateMessage) => void
+  ) {
+    if (!this.client?.connected) return;
+
+    const subscription = this.client.subscribe(
+      `/user/${userId}/queue/notification`,
+      (message) => {
+        const data = JSON.parse(message.body);
+        callback(data);
+      }
+    );
+
+    this.subscriptions.set('waiting-personal', subscription);
+  }
 
   // 좌석 반납
   public releaseSeat(seatId: number, seatNumber: number): void {
@@ -240,7 +265,6 @@ class WebSocketService {
 
   //강제 반납 알림 메시지 전송
   public subscribeToSeatNotification(seatId: number, callback: (notification: AdminNotification) => void) {
-    console.log('🔔 구독 시작: /topic/seat/' + seatId);
     if (!this.client || !this.client.connected) {
       console.warn('Websocket is not connected');
       return () => { };
@@ -249,9 +273,7 @@ class WebSocketService {
     const subscription = this.client.subscribe(
       `/topic/seat/${seatId}`,
       (message: any) => {
-        console.log('🔔 메시지 수신!', message.body);
         const notification: AdminNotification = JSON.parse(message.body);
-        console.log("강제반납알림수신:", notification);
         callback(notification);
       }
     );
@@ -271,6 +293,7 @@ class WebSocketService {
     }
     console.log('관리자 제어 전송:', request);
     this.client.publish({
+
       destination: '/app/admin/control',
       body: JSON.stringify(request),
     });

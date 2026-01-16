@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
 import Home from './pages/home/Home';
-import Profile from './pages/Profile';
+
 import RoomList from './pages/RoomList';
 // import RoomDetail from './pages/RoomDetail';
 import MyReservation from './pages/MyReservation';
@@ -90,7 +90,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/roomList" element={<RoomList />} />
         <Route path="myReservation" element={<MyReservation />} />
         <Route path="/admin" element={<AdminPage />} />

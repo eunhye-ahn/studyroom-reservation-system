@@ -1,3 +1,4 @@
+import { WaitingQueue } from 'src/api/waitingApi';
 import { create } from 'zustand'
 
 interface Reservation {
@@ -6,14 +7,30 @@ interface Reservation {
 }
 
 interface ReservationState {
+
+    //예약
     myReservations: Reservation[];
     currentSeatId: number | null;
     currentReservationId: number | null;
     setMyReservations: (reservations: Reservation[]) => void;
     setCurrentReservationId: (id: number | null) => void;
+
+    //대기
+    myWaitingList: WaitingQueue[];
+    waitingNotification: {
+        type: 'ASSIGNED' | 'EXPIRED' | 'WAITING' | 'CANCELLED' | 'CONFIRMED',
+        waiting: WaitingQueue | null;
+    } | null;
+    setMyWaitingList: (list: WaitingQueue[]) => void;
+    addWaiting: (waiting: WaitingQueue) => void;
+    updateWaiting: (waiting: WaitingQueue) => void;
+    removeWaiting: (waitingId: number) => void;
+    setWaitingNotification: (notification: any) => void;
+    clearWaitingNotification: () => void;
 }
 
 const useReservationStore = create<ReservationState>((set) => ({
+
     myReservations: [],
     currentSeatId: null,
     currentReservationId: null,
@@ -30,7 +47,34 @@ const useReservationStore = create<ReservationState>((set) => ({
 
     setCurrentReservationId: (id: number | null) => {
         set({ currentReservationId: id });
-    }
+    },
+
+    myWaitingList: [],
+    waitingNotification: null,
+
+
+    setMyWaitingList: (list) => set({ myWaitingList: list }),
+
+    addWaiting: (waiting) => set((state) => ({
+        myWaitingList: [...state.myWaitingList, waiting]
+    })),
+
+    updateWaiting: (waiting) => set((state) => ({
+        myWaitingList: state.myWaitingList.map(w =>
+            w.id === waiting.id ? waiting : w
+        )
+    })),
+    removeWaiting: (waitingId) => set((state) => ({
+        myWaitingList: state.myWaitingList.filter(w => w.id !== waitingId)
+    })),
+
+    setWaitingNotification: (notification) => set({
+        waitingNotification: notification
+    }),
+
+    clearWaitingNotification: () => set({
+        waitingNotification: null
+    }),
 }));
 
 

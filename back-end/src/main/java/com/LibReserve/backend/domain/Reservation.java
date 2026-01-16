@@ -1,9 +1,7 @@
 package com.LibReserve.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +10,8 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @Entity
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "reservations")
 public class Reservation {
     @Id
@@ -35,10 +34,6 @@ public class Reservation {
     @Column(nullable = false)
     private int extensionCount = 0;
 
-    @Column(name = "end_date", nullable = false)
-    public LocalDate getEndDate() {
-        return endDate;
-    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
@@ -52,8 +47,9 @@ public class Reservation {
         return LocalDateTime.of(this.endDate, this.endTime);
     }
 
-
-    public Reservation(User user, LocalDate date, LocalTime startTime,LocalDate endDate, LocalTime endTime, Seat seat, int extensionCount, ReservationStatus status) {
+    public Reservation(User user, LocalDate date, LocalTime startTime,
+                       LocalDate endDate, LocalTime endTime, Seat seat,
+                       int extensionCount, ReservationStatus status) {
         this.user = user;
         this.date = date;
         this.startTime = startTime;
@@ -63,4 +59,5 @@ public class Reservation {
         this.extensionCount = extensionCount;
         this.status = status;
     }
+
 }
